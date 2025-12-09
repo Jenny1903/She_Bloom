@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -96,9 +97,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   void _navigateToNextScreen(){
     Future.delayed(const Duration(seconds: 4), (){
       if (mounted){
-        print('Login Screen');
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
       }
-
     });
 
   }

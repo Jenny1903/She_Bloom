@@ -59,4 +59,7 @@ flutter:
      - family: YesevaOne
        fonts:
          - asset: assets/fonts/YesevaOne.ttf
+     - family: Gaqire
+       fonts:
+         - asset: assets/fonts/Gaqire.otf
 
