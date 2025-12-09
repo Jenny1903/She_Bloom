@@ -9,17 +9,24 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
+  //animating logo flower
+  late AnimationController _flowerController;
+  late Animation<double> _flowerRotationAnimation;
+  late Animation<double> _flowerScaleAnimation;
+
+  bool _startFlowerAnimation = false;
 
   //initializing state
   @override
   void initState() {
     super.initState();
     _setupAnimations();
+    _setupFlowerAnimation();
     _navigateToNextScreen();
   }
 
@@ -42,11 +49,52 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     //starts animating
     _controller.forward();
+
+    //flower animation
+    _controller.addStatusListener((status){
+      if (status == AnimationStatus.completed){
+        Future.delayed(const Duration(milliseconds: 300),(){
+          if(mounted){
+            setState(() {
+              _startFlowerAnimation = true;
+            });
+            _flowerController.forward();
+          }
+        });
+      }
+    });
+  }
+
+  void _setupFlowerAnimation(){
+    _flowerController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+        vsync: this,
+    );
+
+    _flowerRotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 6.0,
+    ).animate(
+      CurvedAnimation(
+          parent: _flowerController,
+          curve: Curves.easeInOut,
+      ),
+    );
+
+    _flowerScaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 20.0,
+    ).animate(
+      CurvedAnimation(
+          parent: _flowerController,
+          curve: Curves.easeIn,
+      ),
+    );
   }
 
   //connecting to next screen
   void _navigateToNextScreen(){
-    Future.delayed(const Duration(seconds: 3), (){
+    Future.delayed(const Duration(seconds: 4), (){
       if (mounted){
         print('Login Screen');
       }
@@ -59,6 +107,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void dispose(){
     _controller.dispose();
+    _flowerController.dispose();
   super.dispose();
   }
 
@@ -105,7 +154,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       borderRadius: BorderRadius.circular(20),
       boxShadow: [
         BoxShadow(
-          color: AppColors.primaryPink.withOpacity(0.2),
+          color: AppColors.primaryPink.withOpacity(0.3),
           blurRadius: 20,
           spreadRadius: 5,
         ),
@@ -116,11 +165,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Icon(
-          //   Icons.local_florist,
-          //   size: 80,
-          //   color: AppColors.darkPink,
-          // ),
           const SizedBox(height: 10),
           _buildAppName(),
         ],
@@ -129,64 +173,87 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   );
 }
 
-   Widget _buildAppName(){
-    return RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: 'She',
-            style: TextStyle(
-              fontSize: 32,
-              fontFamily: 'YesevaOne',
-              fontWeight: FontWeight.w300,
-              color: AppColors.darkPink,
-              letterSpacing: 1,
-            ),
-          ),
+   Widget _buildAppName() {
+     return RichText(
+       text: TextSpan(
+         children: [
+           TextSpan(
+             text: 'She',
+             style: TextStyle(
+               fontSize: 32,
+               fontFamily: 'YesevaOne',
+               fontWeight: FontWeight.w300,
+               color: AppColors.darkPink,
+               letterSpacing: 1,
+             ),
+           ),
 
-          TextSpan(
-            text: 'Bl',
-            style: TextStyle(
-              fontSize: 32,
-              fontFamily: 'YesevaOne',
-              fontWeight: FontWeight.w300,
-              color: AppColors.darkPink,
-              letterSpacing: 1,
-            ),
-          ),
+           TextSpan(
+             text: 'Bl',
+             style: TextStyle(
+               fontSize: 32,
+               fontFamily: 'YesevaOne',
+               fontWeight: FontWeight.w300,
+               color: AppColors.darkPink,
+               letterSpacing: 1,
+             ),
+           ),
 
-          // const TextSpan(
-          //   text: '🌸',
-          //   style: TextStyle(fontSize: 30),
-          // ),
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle, // Aligns flower with text center
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2.0), // Space around flower
-                child: SvgPicture.asset(
-                  'assets/flower.svg',
-                  height: 40,
-                  colorFilter: ColorFilter.mode(AppColors.darkPink, BlendMode.srcIn), // Optional: Tint the SVG
-                ),
-              ),
-            ),
-          ),
+           WidgetSpan(
+             alignment: PlaceholderAlignment.middle,
+             child: _startFlowerAnimation
+                 ? AnimatedBuilder(
+               animation: _flowerController,
+               builder: (context, child) {
+                 return Transform.rotate(
+                   angle: _flowerRotationAnimation.value * 2 * 3.14159,
+                   child: Transform.scale(
+                     scale: _flowerScaleAnimation.value,
+                     child: Opacity(
+                       opacity: 1.0 - (_flowerScaleAnimation.value / 20),
+                       child: Padding(
+                         padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                         child: SvgPicture.asset(
+                           'assets/flower.svg',
+                           height: 40,
+                           colorFilter: ColorFilter.mode(
+                             AppColors.darkPink,
+                             BlendMode.srcIn,
+                           ),
+                         ),
+                       ),
+                     ),
+                   ),
+                 );
+               },
+             )
+                 : Padding(
+               padding: const EdgeInsets.symmetric(horizontal: 2.0),
+               child: SvgPicture.asset(
+                 'assets/flower.svg',
+                 height: 40,
+                 colorFilter: ColorFilter.mode(
+                   AppColors.darkPink,
+                   BlendMode.srcIn,
+                 ),
+               ),
+             ),
+           ),
 
-          TextSpan(
-            text: 'om',
-            style: TextStyle(
-              fontSize: 32,
-              fontFamily: 'YesevaOne',
-              fontWeight: FontWeight.w300,
-              color: AppColors.darkPink,
-              letterSpacing: 1,
-            ),
-          ),
-        ],
-      ),
-  );
+
+           TextSpan(
+             text: 'om',
+             style: TextStyle(
+               fontSize: 32,
+               fontFamily: 'YesevaOne',
+               fontWeight: FontWeight.w300,
+               color: AppColors.darkPink,
+               letterSpacing: 1,
+             ),
+           ),
+         ],
+       ),
+     );
 }
 
    Widget _buildTagline(){
