@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
-          // Hamburger menu
+          //Hamburger menu
           IconButton(
             icon: const Icon(Icons.menu, size: 28),
             onPressed: () {
@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(width: 12),
 
-          // User greeting
+          //User greeting
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Search icon
+          //Search icon
           IconButton(
             icon: Icon(Icons.search, size: 28, color: AppColors.darkGrey),
             onPressed: () {
@@ -128,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(width: 4),
 
-          // Track button
+          //Track button
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Top row cards (Daily Nutrition, Healthy Choices)
+  //Top row cards (Daily Nutrition, Healthy Choices)
   Widget _buildTopRowCards() {
     return Row(
       children: [
@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Bottom row cards (Workout/Yoga, Hygiene Picks)
+  //Bottom row cards (Workout/Yoga, Hygiene Picks)
   Widget _buildBottomRowCards() {
     return Row(
       children: [
@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         const SizedBox(width: 16),
 
-        // Hygiene Picks card
+        //Hygiene Picks card
         Expanded(
           child: CategoryCard(
             title: 'Hygiene\nPicks',
@@ -235,12 +235,92 @@ class _HomeScreenState extends State<HomeScreen> {
 
         //card2: bloodFlow
         InfoCard(
-          imagePath: 'assets/bloodflow.jpg',
-          title: 'Women\'s Health',
-          description: 'Essential information about women\'s health, wellness tips, and lifestyle guidance.',
-          onTap: () => print('Women\'s Health card tapped'),
+          imagePath: 'assets/images/bloodflow.jpg',
+          title: 'Pads, Tampons & Blood Flow',
+          description: 'Understand pads, tampons and how to track your menstrual blood flow.',
+          onTap: () => print('bloodFlow card tapped'),
         ),
 
+        //card3: medication
+        InfoCard(
+            imagePath: 'assets/images/pills.jpg',
+            title: 'Birth Control & Medications',
+            description: 'Learn about contraceptive options, pills, patches and how they work.',
+            onTap: () => print('medication card tapped'),
+        ),
+
+        //card4: breast health
+        InfoCard(
+            imagePath: 'assets/images/breastCancer.jpg',
+            title: 'Breast Health',
+            description: 'Everything about breast health, risks and early signs you should know.',
+            onTap: () => print('Breast Health card tapped'),
+        ),
+
+        //card5: Fertility & Pregnancy
+        InfoCard(
+          imagePath: 'assets/images/eggs.jpg',
+          title: 'Fertility & Pregnancy',
+          description: 'Understanding fertility, conception, and pregnancy journey with expert guidance.',
+          onTap: () => print('Fertility card tapped'),
+        ),
+
+        //card6: pcos/pcod
+        InfoCard(
+            imagePath: 'assets/images/pcos.png',
+          title: 'PCOS/PCOD',
+          description: 'Comprehensive guide to managing PCOS symptoms, treatment options, and lifestyle changes.',
+          onTap: () => print('PCOS card tapped'),
+        ),
+
+        //card7 : mental health
+        InfoCard(
+          imagePath: 'assets/images/depression.png',
+          title: 'Mental Health',
+          description: 'Take care of your mental wellbeing with stress management and self-care tips.',
+          onTap: () => print('Mental Health card tapped'),
+        ),
+
+        //card8: Safe Intimacy Practices
+        InfoCard(
+          imagePath: 'assets/images/safty.png',
+          title: 'Safe Intimacy Practices',
+          description:  'Understand condoms, STI prevention, and how to practice safe and healthy sexual activity.',
+          onTap: () => print('HPV card tapped'),
+        ),
+
+        //card9: pain relife card
+        InfoCard(
+          imagePath: 'assets/images/cramps.png',
+          title: 'Menstrual Cramps & Relief',
+          description: 'Understand why cramps happen and explore natural ways to reduce pain.',
+          onTap: () => print('HPV card tapped'),
+        ),
+
+        //card10: Vaccination card
+        InfoCard(
+            imagePath: 'assets/images/vaccination.png',
+            title: 'HPV & Vaccination',
+            description: 'Know how HPV spreads, its risks, and how vaccination protects your health.',
+            onTap: () => print('HPV card tapped'),
+        ),
+
+
+        //card11: Ultrasound & check-ups
+        InfoCard(
+          imagePath: 'assets/images/checkup.png',
+          title: 'Health Screenings',
+          description: 'Regular health check-ups, ultrasounds, and preventive care for women.',
+          onTap: () => print('Screening card tapped'),
+        ),
+
+        //card12: Reproductive Health
+        InfoCard(
+          imagePath: 'assets/images/trackClock.png',
+          title: 'Reproductive Health',
+          description: 'Understanding reproductive health, contraception, and family planning options.',
+          onTap: () => print('Reproductive Health card tapped'),
+        ),
       ],
     );
   }
