@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _navigateToSignUp() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const SignupScreen()),
+      MaterialPageRoute(builder: (context) => const SignUpScreen()),
     );
   }
 
@@ -102,7 +102,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  //usrname input Field
   Widget _buildUsernameField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

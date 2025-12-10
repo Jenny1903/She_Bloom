@@ -157,7 +157,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       borderRadius: BorderRadius.circular(20),
       boxShadow: [
         BoxShadow(
-          color: AppColors.primaryPink.withOpacity(0.3),
+          color: AppColors.primaryPink.withOpacity(0.1),
           blurRadius: 20,
           spreadRadius: 5,
         ),
