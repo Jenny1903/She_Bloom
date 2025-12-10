@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../widgets/category_card.dart';
+import 'package:she_bloom/widgets/info_card.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,8 +12,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex =0 ;
+  int _selectedIndex = 0 ;
   String userName = "Emily";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,12 +29,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      //grid
                       _buildTopRowCards(),
                       const SizedBox(height: 16),
                       _buildBottomRowCards(),
+
                       const SizedBox(height: 24),
-                      _buildLearnMoreSection(),
+
+                      //learn more
+                      Text(
+                        'Learn more about your body',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkGrey,
+                        ),
+                      ),
+                      // _buildLearnMoreSection(),
+
                       const SizedBox(height: 20),
+
+                      _buildInfoCards(),
                     ],
                   ),
                 ),
@@ -204,152 +222,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //Learn more section
-  Widget _buildLearnMoreSection() {
+  Widget _buildInfoCards(){
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Learn more about your body',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.darkGrey,
-          ),
+        //Card1: menstruation
+        InfoCard(
+            imagePath: 'assets/images/menstruation.jpg',
+            title: 'Menstruation',
+            description: 'Learn about your menstrual cycle, track your period, and understand your body better.',
+            onTap: () => print('Menstruation card tapped'),
         ),
 
-        const SizedBox(height: 16),
-
-        // Menstruation info card
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: AppColors.lightPink,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                  bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-
-                ),
-
-                child: Image.asset(
-                  'assets/images/menstruation.jpg',
-                  width: double.infinity,
-                  height: 180,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace){
-                    //if image not found (fallback)
-                    return Container(
-                      width: double.infinity,
-                      height: 180,
-                      color: AppColors.primaryPink.withOpacity(0.3),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.favorite,
-                              size: 60,
-                              color: AppColors.darkPink,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Image not found',
-                              style: TextStyle(
-                                color: AppColors.textMedium,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-
-              // Title
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 2, top: 10
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Menstruation',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.darkGrey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 2),
-
-              // Description
-              Text(
-                'Lorem ipsum dolor sit amet consectetur. Augue id metus commodo dignissim f.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textMedium,
-                  height: 1.5,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Action icons
-              // Row(
-              //   children: [
-              //     _buildActionIcon(Icons.check_circle_outline),
-              //     const SizedBox(width: 16),
-              //     _buildActionIcon(Icons.home_outlined),
-              //     const SizedBox(width: 16),
-              //     _buildActionIcon(Icons.edit_outlined),
-              //   ],
-              // ),
-            ],
-          ),
+        //card2: bloodFlow
+        InfoCard(
+          imagePath: 'assets/bloodflow.jpg',
+          title: 'Women\'s Health',
+          description: 'Essential information about women\'s health, wellness tips, and lifestyle guidance.',
+          onTap: () => print('Women\'s Health card tapped'),
         ),
+
       ],
     );
   }
 
-  //Action icon button
-  Widget _buildActionIcon(IconData icon) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Icon(
-        icon,
-        size: 24,
-        color: AppColors.darkGrey,
-      ),
-    );
-  }
 
   //Bottom navigation bar
   Widget _buildBottomNavigationBar() {

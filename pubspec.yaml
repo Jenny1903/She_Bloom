@@ -57,6 +57,18 @@ flutter:
     - assets/images/dailyfood.jpg
     - assets/images/picks.jpg
     - assets/images/menstruation.jpg
+    - assets/images/bloodflow.jpg
+    - assets/images/checkup.png
+    - assets/images/cramps.png
+    - assets/images/depression.png
+    - assets/images/pcos.png
+    - assets/images/pills.jpg
+    - assets/images/safty.png
+    - assets/images/breastCancer.jpg
+    - assets/images/trackClock.png
+    - assets/images/vaccination.png
+    - assets/images/eggs.jpg
+
 
   fonts:
      - family: YesevaOne
