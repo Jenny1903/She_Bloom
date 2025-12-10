@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:she_bloom/constants/colors.dart';
+import 'package:she_bloom/screens/home_screen.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -40,7 +41,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     print('Username: $username');
     print('Password: $password');
-    _showSnackBar('Login functionality coming soon!');
+
+
+    //Navigate to home screen
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
   }
 
   void _showSnackBar(String message) {
@@ -167,6 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
               horizontal: 16,
               vertical: 14,
             ),
+            //toggle visibility
             suffixIcon: IconButton(
               icon: Icon(
                 _isPasswordVisible ? Icons.visibility : Icons.visibility_off,

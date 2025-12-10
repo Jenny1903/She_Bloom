@@ -217,7 +217,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                        child: Padding(
                          padding: const EdgeInsets.symmetric(horizontal: 2.0),
                          child: SvgPicture.asset(
-                           'assets/flower.svg',
+                           'assets/images/flower.svg',
                            height: 40,
                            colorFilter: ColorFilter.mode(
                              AppColors.darkPink,
@@ -233,7 +233,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                  : Padding(
                padding: const EdgeInsets.symmetric(horizontal: 2.0),
                child: SvgPicture.asset(
-                 'assets/flower.svg',
+                 'assets/images/flower.svg',
                  height: 40,
                  colorFilter: ColorFilter.mode(
                    AppColors.darkPink,
