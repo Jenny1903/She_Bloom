@@ -1,8 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:she_bloom/firebase_options.dart';
+import 'package:she_bloom/screens/home_screen.dart';
 import 'package:she_bloom/screens/splash_screen.dart';
 import 'constants/colors.dart';
 
-void main(){
+void main() async{
+
+  //initializing Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const SheBloom());
 }
 
@@ -19,7 +28,11 @@ class SheBloom extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Poppins',
       ),
-      home: const SplashScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/home_screen': (context) => const HomeScreen(),
+      },
     );
   }
 }

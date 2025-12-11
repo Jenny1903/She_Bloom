@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:she_bloom/constants/colors.dart';
+
 
 class CategoryCard extends StatelessWidget {
   final String title;
