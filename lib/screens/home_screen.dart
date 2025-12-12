@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../widgets/category_card.dart';
 import 'package:she_bloom/widgets/info_card.dart';
+import 'daily_nutrition_screen.dart';
+import 'profile_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -13,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0 ;
-  String userName = "Emily";
+  String userName = "hello";
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +31,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+
                       //grid
                       _buildTopRowCards(),
                       const SizedBox(height: 16),
                       _buildBottomRowCards(),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 30),
 
                       //learn more
                       Text(
@@ -45,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: AppColors.darkGrey,
                         ),
                       ),
-                      // _buildLearnMoreSection(),
 
                       const SizedBox(height: 20),
 
@@ -60,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
+
   Widget _buildTopBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -80,6 +83,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.menu, size: 28),
             onPressed: () {
               print('Menu pressed');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
             },
           ),
 
@@ -150,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //Top row cards (Daily Nutrition, Healthy Choices)
+  //top-row cards (Daily Nutrition, Healthy Choices)
   Widget _buildTopRowCards() {
     return Row(
       children: [
@@ -163,6 +170,10 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: AppColors.coral,
             onTap: () {
               print('Daily Nutrition tapped');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DailyNutritionScreen()),
+              );
             },
             height: 140,
           ),
@@ -186,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //Bottom row cards (Workout/Yoga, Hygiene Picks)
+  //bottom-row cards (Workout/Yoga, Hygiene Picks)
   Widget _buildBottomRowCards() {
     return Row(
       children: [
@@ -326,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  //Bottom navigation bar
+  //bottom navigation bar
   Widget _buildBottomNavigationBar() {
     return Container(
       decoration: BoxDecoration(
