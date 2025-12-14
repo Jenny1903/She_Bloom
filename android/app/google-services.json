@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "732732931744",
+    "project_id": "shebloom",
+    "storage_bucket": "shebloom.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732732931744:android:25c2884742db9476b753c5",
+        "android_client_info": {
+          "package_name": "com.shebloom.she_bloom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIeLz-HeJ_NHLbYMjYwwZbslAP6JY5TLc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
