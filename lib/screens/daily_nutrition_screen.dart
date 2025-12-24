@@ -1,5 +1,3 @@
-//lib/screens/daily_nutrition_screen.dart
-
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 
@@ -74,7 +72,7 @@ class DailyNutritionScreen extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Image.asset(
-          'assets/nutrition_guide.jpg',
+          'assets/images/dailyfood.jpg',
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             // Placeholder if image not found
