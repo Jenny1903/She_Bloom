@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 
+
 # IntelliJ related
 *.iml
 *.ipr
@@ -43,3 +44,92 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase
+firebase_options.dart
+**/android/app/google-services.json
+**/ios/Runner/GoogleService-Info.plist
+**/lib/firebase_options.dart
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+
+# Firebase
+google-services.json
+**/google-services.json
+GoogleService-Info.plist
+**/GoogleService-Info.plist
+firebase.json
+.firebaserc
+
+cat >> .gitignore << 'EOF'
+
+# iOS
+ios/Podfile.lock
+ios/Pods/
+ios/.symlinks/
+
+EOF
+# Firebase local
+.firebase/
+echo "" >> .gitignore
+echo "# Firebase sensitive files" >> .gitignore
+echo "google-services.json" >> .gitignore
+echo "**/google-services.json" >> .gitignore
+echo "GoogleService-Info.plist" >> .gitignore
+echo "**/GoogleService-Info.plist" >> .gitignore
+echo "firebase.json" >> .gitignore
+echo ".firebaserc" >> .gitignore
+echo ".firebase/" >> .gitignore
+echo "# iOS" >> .gitignore
+echo "ios/Podfile.lock" >> .gitignore
+echo "ios/Pods/" >> .gitignore
+
+# Secrets
+.env
+*.env
+secrets.dart
+
+# Android related
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+
+# iOS/XCode related
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# Exceptions to above rules.
+!**/ios/**/default.mode1v3
+!**/ios/**/default.mode2v3
+!**/ios/**/default.pbxuser
+!**/ios/**/default.perspectivev3
