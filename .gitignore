@@ -1,3 +1,8 @@
+# Backup current .gitignore
+cp .gitignore .gitignore.backup
+
+# Create clean .gitignore
+cat > .gitignore << 'EOF'
 # Miscellaneous
 *.class
 *.log
@@ -12,16 +17,13 @@
 .swiftpm/
 migrate_working_dir/
 
-
 # IntelliJ related
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
+# VS Code
 #.vscode/
 
 # Flutter/Dart/Pub related
@@ -40,55 +42,30 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
+# Android Studio build artifacts
 /android/app/debug
 /android/app/profile
 /android/app/release
 
-# Firebase
+# Firebase sensitive files
 firebase_options.dart
-**/android/app/google-services.json
-**/ios/Runner/GoogleService-Info.plist
-**/lib/firebase_options.dart
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
-lib/firebase_options.dart
-
-# Firebase
 google-services.json
 **/google-services.json
 GoogleService-Info.plist
 **/GoogleService-Info.plist
 firebase.json
 .firebaserc
-
-cat >> .gitignore << 'EOF'
-
-# iOS
-ios/Podfile.lock
-ios/Pods/
-ios/.symlinks/
-
-EOF
-# Firebase local
 .firebase/
-echo "" >> .gitignore
-echo "# Firebase sensitive files" >> .gitignore
-echo "google-services.json" >> .gitignore
-echo "**/google-services.json" >> .gitignore
-echo "GoogleService-Info.plist" >> .gitignore
-echo "**/GoogleService-Info.plist" >> .gitignore
-echo "firebase.json" >> .gitignore
-echo ".firebaserc" >> .gitignore
-echo ".firebase/" >> .gitignore
-echo "# iOS" >> .gitignore
-echo "ios/Podfile.lock" >> .gitignore
-echo "ios/Pods/" >> .gitignore
 
 # Secrets
 .env
 *.env
 secrets.dart
+
+# iOS
+ios/Podfile.lock
+ios/Pods/
+ios/.symlinks/
 
 # Android related
 **/android/**/gradle-wrapper.jar
@@ -128,8 +105,9 @@ secrets.dart
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 
-# Exceptions to above rules.
+# Exceptions to above rules
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3
 !**/ios/**/default.pbxuser
-!**/ios/**/default.perspectivev3lib/firebase_options.dart
+!**/ios/**/default.perspectivev3
+EOF
