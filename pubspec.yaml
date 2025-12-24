@@ -48,6 +48,7 @@ flutter:
     - assets/images/trackClock.png
     - assets/images/vaccination.png
     - assets/images/eggs.jpg
+    - assets/images/nutrition.png
 
 
   fonts:

@@ -186,7 +186,7 @@ Create `firebase_options.dart` using FlutterFire CLI (auto-generated)
 
 | Profile | Nutrition | Info Cards |
 |---------|-----------|------------|
-| ![Profile](screenshots/profile.png) | ![Nutrition](screenshots/nutrition.png) | ![Cards](screenshots/cards.png) |
+| ![Profile](screenshots/profile.png) | ![Nutrition](assets/images/nutrition.png) | ![Cards](screenshots/cards.png) |
 
 ## 🗺️ Roadmap
 
