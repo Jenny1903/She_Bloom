@@ -118,19 +118,40 @@ lib/
    ```
 
 3. **Firebase Setup**
-   ```bash
-   # Install Firebase CLI
-   npm install -g firebase-tools
-   
-   # Login to Firebase
-   firebase login
-   
-   # Install FlutterFire CLI
+
+This app requires Firebase configuration. To set up:
+
+### Method 1: Using FlutterFire CLI (Recommended)
+
+1. Install FlutterFire CLI:
+```bash
    dart pub global activate flutterfire_cli
-   
-   # Configure Firebase for your project
+```
+
+2. Configure Firebase:
+```bash
    flutterfire configure
-   ```
+```
+
+3. This generates:
+   - `lib/firebase_options.dart`
+   - `android/app/google-services.json`
+   - `ios/Runner/GoogleService-Info.plist`
+
+### Method 2: Manual Setup
+
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Add Android and iOS apps
+3. Download and place configuration files as shown above
+4. Enable Authentication and Firestore in Firebase Console
+
+### Run the app
+```bash
+flutter pub get
+flutter run
+```
+
+**Note:** Firebase configuration files are excluded from version control for security.
 
 4. **Add Assets**
    - Place your images in `assets/images/`
