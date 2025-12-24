@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../widgets/category_card.dart';
 import 'package:she_bloom/widgets/info_card.dart';
+import 'daily_nutrition_screen.dart';
+import 'profile_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -79,7 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.menu, size: 28),
             onPressed: () {
-              print('Menu pressed');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
             },
           ),
 
@@ -162,7 +167,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.restaurant,
             backgroundColor: AppColors.coral,
             onTap: () {
-              print('Daily Nutrition tapped');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DailyNutritionScreen()),
+              );
             },
             height: 140,
           ),
