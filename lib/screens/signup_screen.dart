@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:she_bloom/constants/colors.dart';
+import 'package:she_bloom/services/auth_service.dart';
+
+import 'home_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -10,15 +13,19 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  final AuthService _authService = AuthService();
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -38,7 +45,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return phone.length >= 10 && RegExp(r'^[0-9]+$').hasMatch(phone);
   }
 
-  void _handleSignUp() {
+  void _handleSignUp() async{
+
+    if (_isLoading) return;
+
     String name = _nameController.text.trim();
     String email = _emailController.text.trim();
     String phone = _phoneController.text.trim();
@@ -46,64 +56,92 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String confirmPassword = _confirmPasswordController.text;
 
     if (name.isEmpty) {
-      _showSnackBar('Enter Your Name');
+      _showSnackBar('Enter Your Name', isError: true);
       return;
     }
     if (email.isEmpty) {
-      _showSnackBar('Please enter your email');
+      _showSnackBar('Please enter your email', isError: true);
       return;
     }
 
     if (!_isValidEmail(email)) {
-      _showSnackBar('Please enter a valid email address');
+      _showSnackBar('Please enter a valid email address', isError: true);
       return;
     }
 
     if (phone.isEmpty) {
-      _showSnackBar('Please enter your phone number');
+      _showSnackBar('Please enter your phone number', isError: true);
       return;
     }
 
     if (!_isValidPhone(phone)) {
-      _showSnackBar('Please enter a valid phone number (min 10 digits)');
+      _showSnackBar('Please enter a valid phone number (min 10 digits)', isError: true);
       return;
     }
 
     if (password.isEmpty) {
-      _showSnackBar('Please enter a password');
+      _showSnackBar('Please enter a password', isError: true);
       return;
     }
 
     if (password.length < 6) {
-      _showSnackBar('Password must be at least 6 characters');
+      _showSnackBar('Password must be at least 6 characters', isError: true);
       return;
     }
 
     if (confirmPassword.isEmpty) {
-      _showSnackBar('Please confirm your password');
+      _showSnackBar('Please confirm your password', isError: true);
       return;
     }
 
     if (password != confirmPassword) {
-      _showSnackBar('Passwords do not match');
+      _showSnackBar('Passwords do not match', isError: true);
       return;
     }
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.pop(context);
-      }
+
+    setState(() {
+      _isLoading = true;
     });
+
+    Map<String, dynamic> result = await _authService.signUp(
+      name: name,
+      email: email,
+      phone: phone,
+      password: password,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (result['success']) {
+      _showSnackBar(result['message'], isError: false);
+
+      // Navigate back to login after successful signup
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          // Navigator.pushReplacementNamed(context, '/home_screen');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      });
+    } else {
+      _showSnackBar(result['message'], isError: true);
+    }
   }
 
-  void _showSnackBar(String message) {
+  void _showSnackBar(String message, {required bool isError}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppColors.darkPink,
-        duration: const Duration(seconds: 2),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        duration: const Duration(seconds: 3),
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

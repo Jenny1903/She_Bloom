@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:she_bloom/constants/colors.dart';
 import 'package:she_bloom/screens/home_screen.dart';
-import 'signup_screen.dart';
+import 'package:she_bloom/screens/signup_screen.dart';
+import 'package:she_bloom/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,50 +13,75 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   //controllers
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final AuthService _authService = AuthService();
+  
   bool _isPasswordVisible = false;
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   //validation
-  void _handleLogin() {
-    String username = _usernameController.text.trim();
+  void _handleLogin() async{
+    
+    if(_isLoading) return;
+    
+    String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
-    if (username.isEmpty) {
-      _showSnackBar('Please Enter Your Username');
+    if (email.isEmpty) {
+      _showSnackBar('Please Enter Your Email', isError: true);
       return;
     }
 
     if (password.isEmpty) {
-      _showSnackBar('Please Enter Your Password');
+      _showSnackBar('Please Enter Your Password', isError: true);
       return;
     }
 
-    print('Username: $username');
-    print('Password: $password');
-
-
-    //Navigate to home screen
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    setState(() {
+      _isLoading = true;
+    });
+    
+    Map<String, dynamic> result = await _authService.login(
+        email: email, 
+        password: password,
     );
-  }
+    
+    setState(() {
+      _isLoading = false;
+    });
+    
+    //handle result
+    if(result['success']){
+      _showSnackBar(result['message'], isError: false);
+      
+      //Navigate to home screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }else {
+      _showSnackBar(result['message'], isError: true);
+    }
+    }
 
-  void _showSnackBar(String message) {
+    
+
+  void _showSnackBar(String message, {required bool isError}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: AppColors.darkPink,
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -114,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Username',
+          'Email',
           style: TextStyle(
             fontSize: 14,
             color: AppColors.darkGrey,
@@ -124,10 +150,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
         const SizedBox(height: 8),
         TextField(
-          controller: _usernameController,
+          controller: _emailController,
           decoration: InputDecoration(
-            hintText: 'Enter username',
-            hintStyle: TextStyle(color: AppColors.textLight, fontSize: 14),
+            hintText: 'Enter email',
+            hintStyle: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 14),
             filled: true,
             fillColor: AppColors.white,
             border: OutlineInputBorder(
@@ -174,6 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
               horizontal: 16,
               vertical: 14,
             ),
+
             //toggle visibility
             suffixIcon: IconButton(
               icon: Icon(
@@ -191,6 +220,8 @@ class _LoginScreenState extends State<LoginScreen> {
       ],
     );
   }
+
+
 
   // LogIn button
   Widget _buildLoginButton() {
