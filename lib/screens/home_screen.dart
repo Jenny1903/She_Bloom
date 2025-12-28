@@ -4,6 +4,7 @@ import '../widgets/category_card.dart';
 import 'package:she_bloom/widgets/info_card.dart';
 import 'daily_nutrition_screen.dart';
 import 'profile_screen.dart';
+import 'mood_tracker_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -35,6 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildTopRowCards(),
                     const SizedBox(height: 16),
                     _buildBottomRowCards(),
+                    const SizedBox(height: 16),
+                    _buildThirdRowCards(),
 
                     const SizedBox(height: 24),
 
@@ -222,6 +225,28 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: AppColors.burgundy,
             onTap: () {
               print('Hygiene Picks tapped');
+            },
+            height: 140,
+          ),
+        ),
+      ],
+    );
+  }
+  //third-row cards (Mood Tracker, another card)
+  Widget _buildThirdRowCards() {
+    return Row(
+      children: [
+        // Mood Tracker card
+        Expanded(
+          child: CategoryCard(
+            title: 'Mood\nTracker',
+            icon: Icons.mood,
+            backgroundColor: AppColors.burgundy,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MoodTrackerScreen()),
+              );
             },
             height: 140,
           ),
