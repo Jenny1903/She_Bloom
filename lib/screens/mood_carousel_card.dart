@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:she_bloom/constants/colors.dart';
 
 class MoodCarouselCard extends StatefulWidget {
   final String title;
@@ -26,9 +25,9 @@ class _MoodCarouselCardState extends State<MoodCarouselCard> {
 
   // List of mood emojis
   final List<String> _emojis = [
-    '😊', // Happy
+    '🥰', // Happy
     '😌', // Calm
-    '😐', // Okay
+    '😊', // Okay
     '😔', // Sad
     '😢', // Crying
     '😡', // Angry

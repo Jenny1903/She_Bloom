@@ -8,7 +8,6 @@ import 'profile_screen.dart';
 import 'mood_tracker_screen.dart';
 
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -212,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               print('Workout/Yoga tapped');
             },
-            height: 150,
+            height: 140,
           ),
         ),
 
@@ -228,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               print('Hygiene Picks tapped');
             },
-            height: 150,
+            height: 140,
           ),
         ),
       ],
@@ -264,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 MaterialPageRoute(builder: (context) => const MoodTrackerScreen()),
               );
             },
-            height: 140,
+            height: 150,
           ),
         ),
       ],
