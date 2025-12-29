@@ -3,8 +3,10 @@ import '../constants/colors.dart';
 import '../widgets/category_card.dart';
 import 'package:she_bloom/widgets/info_card.dart';
 import 'daily_nutrition_screen.dart';
+import 'mood_carousel_card.dart';
 import 'profile_screen.dart';
 import 'mood_tracker_screen.dart';
+
 
 
 class HomeScreen extends StatefulWidget {
@@ -210,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               print('Workout/Yoga tapped');
             },
-            height: 140,
+            height: 150,
           ),
         ),
 
@@ -226,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               print('Hygiene Picks tapped');
             },
-            height: 140,
+            height: 150,
           ),
         ),
       ],
@@ -236,11 +238,25 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildThirdRowCards() {
     return Row(
       children: [
-        // Mood Tracker card
+        // // Mood Tracker card
+        // Expanded(
+        //   child: CategoryCard(
+        //     title: 'Mood\nTracker',
+        //     icon: Icons.mood,
+        //     backgroundColor: AppColors.burgundy,
+        //     onTap: () {
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(builder: (context) => const MoodTrackerScreen()),
+        //       );
+        //     },
+        //     height: 140,
+        //   ),
+        // ),
+
         Expanded(
-          child: CategoryCard(
+          child: MoodCarouselCard(
             title: 'Mood\nTracker',
-            icon: Icons.mood,
             backgroundColor: AppColors.burgundy,
             onTap: () {
               Navigator.push(
