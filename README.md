@@ -180,8 +180,8 @@ Create `firebase_options.dart` using FlutterFire CLI (auto-generated)
 
 ## 📱 Screenshots
 
-| Splash Screen | Login | Home Dashboard |
-|---------------|-------|----------------|
+| Splash Screen | Login | Home Dashboard                |
+|---------------|-------|-------------------------------|
 | ![Splash](screenshots/splash.png) | ![Login](screenshots/login.png) | ![Home](screenshots/home.png) |
 
 | Profile | Nutrition | Info Cards |
