@@ -7,6 +7,7 @@ import 'mood_carousel_card.dart';
 import 'profile_screen.dart';
 import 'mood_tracker_screen.dart';
 import 'hygiene_picks_screen.dart';
+import 'workout_yoga_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -210,7 +211,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.self_improvement,
             backgroundColor: AppColors.coral,
             onTap: () {
-              print('Workout/Yoga tapped');
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WorkoutYogaScreen()),
+              );
             },
             height: 140,
           ),
