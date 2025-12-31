@@ -71,46 +71,50 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Date selector
-            _buildDateSelector(),
-
-            const SizedBox(height: 30),
-
-            // "How are you feeling?" header
-            Text(
-              'How are you feeling today?',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.darkGrey,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date selector
+              _buildDateSelector(),
+        
+              const SizedBox(height: 30),
+        
+              // "How are you feeling?" header
+              Text(
+                'How are you feeling today?',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkGrey,
+                ),
               ),
-            ),
+        
+              const SizedBox(height: 20),
+        
+              // Mood grid
+              _buildMoodGrid(),
+        
+              const SizedBox(height: 30),
+        
+              // Notes section
+              _buildNotesSection(),
+        
+              const SizedBox(height: 30),
+        
+              // Save button
+              _buildSaveButton(),
+        
+              const SizedBox(height: 30),
+        
+              // Recent mood history
+              _buildRecentMoods(),
 
-            const SizedBox(height: 20),
-
-            // Mood grid
-            _buildMoodGrid(),
-
-            const SizedBox(height: 30),
-
-            // Notes section
-            _buildNotesSection(),
-
-            const SizedBox(height: 30),
-
-            // Save button
-            _buildSaveButton(),
-
-            const SizedBox(height: 30),
-
-            // Recent mood history
-            _buildRecentMoods(),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -322,7 +326,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
         //weekly mood chart
         Container(
-          height: 100,
+          height: 120,
           decoration: BoxDecoration(
             color: AppColors.lightPink.withOpacity(0.3),
             borderRadius: BorderRadius.circular(16),
@@ -347,28 +351,31 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
   //mood bar for chart
   Widget _buildMoodBar(String day, String emoji, double height) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text(emoji, style: TextStyle(fontSize: 20)),
-        const SizedBox(height: 4),
-        Container(
-          width: 30,
-          height: 60 * height,
-          decoration: BoxDecoration(
-            color: AppColors.darkPink,
-            borderRadius: BorderRadius.circular(8),
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: TextStyle(fontSize: 16)),
+          const SizedBox(height: 4),
+          Container(
+            width: 30,
+            height: 55 * height,
+            decoration: BoxDecoration(
+              color: AppColors.darkPink,
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          day,
-          style: TextStyle(
-            fontSize: 10,
-            color: AppColors.textMedium,
+          const SizedBox(height: 4),
+          Text(
+            day,
+            style: TextStyle(
+              fontSize: 9,
+              color: AppColors.textMedium,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
