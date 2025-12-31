@@ -190,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: CategoryCard(
             title: 'Healthy\nChoices',
+            imagePath: 'assets/images/healthyChoices.jpg',
             icon: Icons.favorite,
             backgroundColor: AppColors.primaryPink,
             onTap: () {
@@ -213,6 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: CategoryCard(
             title: 'Workout/\nYoga',
+            imagePath: 'assets/images/workoutYoga.jpg',
             icon: Icons.self_improvement,
             backgroundColor: AppColors.coral,
             onTap: () {
