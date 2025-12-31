@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:she_bloom/screens/healthy_choices_screen.dart';
 import '../constants/colors.dart';
 import '../widgets/category_card.dart';
 import 'package:she_bloom/widgets/info_card.dart';
@@ -8,6 +9,7 @@ import 'profile_screen.dart';
 import 'mood_tracker_screen.dart';
 import 'hygiene_picks_screen.dart';
 import 'workout_yoga_screen.dart';
+import 'healthy_choices_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -191,7 +193,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.favorite,
             backgroundColor: AppColors.primaryPink,
             onTap: () {
-              print('Healthy Choices tapped');
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HealthyChoicesScreen())
+              );
             },
             height: 140,
           ),
