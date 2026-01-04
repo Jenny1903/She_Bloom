@@ -10,6 +10,7 @@ import 'mood_tracker_screen.dart';
 import 'hygiene_picks_screen.dart';
 import 'workout_yoga_screen.dart';
 import 'healthy_choices_screen.dart';
+import 'reminder_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
