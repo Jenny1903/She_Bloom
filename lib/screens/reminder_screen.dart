@@ -16,20 +16,31 @@ class _ReminderScreenState extends State<ReminderScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        //back button
         leading: IconButton(
-            onPressed: () =>
-          Navigator.pop(context),
-            icon: Icon(Icons.arrow_back,
-              color: AppColors.darkGrey),
-            ),
-          title: Text(
-            'Reminders',
-            style: TextStyle(
-              color: AppColors.darkGrey,
-              fontWeight: FontWeight.bold,
-            ),
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back, color: AppColors.darkGrey),
+        ),
+        title: Text(
+          'Reminders',
+          style: TextStyle(
+            color: AppColors.darkGrey,
+            fontWeight: FontWeight.bold,
           ),
         ),
-      );
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              //todo: adding a reminder
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Add new reminder -Coming soon!')),
+              );
+            },
+            icon: Icon(Icons.add, color: AppColors.darkPink),
+          ),
+        ],
+      ),
+    );
   }
 }
