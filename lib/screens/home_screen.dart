@@ -21,7 +21,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0 ;
+  // int _selectedIndex = 0 ;
+  int _selectedIndex = 0;
   String userName = "Emily";
 
   @override
@@ -71,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
+
   Widget _buildTopBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -178,7 +180,8 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const DailyNutritionScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const DailyNutritionScreen()),
               );
             },
             height: 140,
@@ -197,7 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HealthyChoicesScreen())
+                  MaterialPageRoute(
+                      builder: (context) => HealthyChoicesScreen())
               );
             },
             height: 140,
@@ -220,8 +224,9 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: AppColors.coral,
             onTap: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const WorkoutYogaScreen()),
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const WorkoutYogaScreen()),
               );
             },
             height: 140,
@@ -239,8 +244,9 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: AppColors.burgundy,
             onTap: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HygienePicksScreen()),
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const HygienePicksScreen()),
               );
             },
             height: 140,
@@ -249,6 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
+
   //third-row cards (Mood Tracker, another card)
   Widget _buildThirdRowCards() {
     return Row(
@@ -261,7 +268,8 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const MoodTrackerScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const MoodTrackerScreen()),
               );
             },
             height: 150,
@@ -271,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildInfoCards(){
+  Widget _buildInfoCards() {
     return Column(
       children: [
         //Card1: menstruation
@@ -334,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
         InfoCard(
           imagePath: 'assets/images/safty.png',
           title: 'Safe Intimacy Practices',
-          description:  'Understand condoms, STI prevention, and how to practice safe and healthy sexual activity.',
+          description: 'Understand condoms, STI prevention, and how to practice safe and healthy sexual activity.',
           onTap: () => print('HPV card tapped'),
         ),
 
@@ -374,8 +382,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-  //Bottom navigation bar
+//Bottom navigation bar
   Widget _buildBottomNavigationBar() {
     return Container(
       decoration: BoxDecoration(
@@ -394,7 +401,19 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _selectedIndex = index;
           });
-          print('Bottom nav item $index tapped');
+
+          // Navigate based on index
+          if (index == 0) {
+            // Already on home, do nothing
+          } else if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ReminderScreen()),
+            );
+          } else if (index == 2) {
+            // TODO: Add track/calendar screen
+            print('Track tapped');
+          }
         },
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
@@ -405,20 +424,19 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.check_circle_outline, size: 28),
-            label: 'Check',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.home, size: 28),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.edit, size: 28),
-            label: 'Edit',
+            icon: Icon(Icons.notifications, size: 28),
+            label: 'Reminders',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today, size: 28),
+            label: 'Track',
           ),
         ],
       ),
     );
   }
-
 }
