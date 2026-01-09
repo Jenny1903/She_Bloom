@@ -11,6 +11,7 @@ import 'hygiene_picks_screen.dart';
 import 'workout_yoga_screen.dart';
 import 'healthy_choices_screen.dart';
 import 'reminder_screen.dart';
+import 'period_tracker_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -145,19 +146,29 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 4),
 
           //Track button
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.lightPink,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.darkPink, width: 1),
-            ),
-            child: Text(
-              'Track',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.darkPink,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PeriodTrackerScreen(),
+                  ),
+              );
+            },
+
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.lightPink,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.darkPink, width: 1),
+              ),
+              child: Text(
+                'Track',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkPink,
+                ),
               ),
             ),
           ),
@@ -412,7 +423,10 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           } else if (index == 2) {
             // TODO: Add track/calendar screen
-            print('Track tapped');
+            Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PeriodTrackerScreen()),
+            );
           }
         },
         type: BottomNavigationBarType.fixed,
