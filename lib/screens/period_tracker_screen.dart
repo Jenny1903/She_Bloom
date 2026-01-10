@@ -1,5 +1,3 @@
-// 📅 lib/screens/period_tracker_screen.dart
-
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
 import '../services/period.service.dart';
@@ -16,7 +14,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
   DateTime _selectedMonth = DateTime.now();
   DateTime _today = DateTime.now();
 
-  // 🔥 Firebase service
+  //firebase service
   final PeriodService _periodService = PeriodService();
 
   // Store period dates (loaded from Firebase)
@@ -33,7 +31,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     _loadData();
   }
 
-  // 🔥 Load all data from Firebase
+  //load all data from Firebase
   Future<void> _loadData() async {
     setState(() {
       isLoading = true;
@@ -70,7 +68,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
       _calculateLastPeriod();
     });
 
-    // 🔥 Save to Firebase
+    //save to Firebase
     bool success;
     if (wasAdded) {
       success = await _periodService.savePeriodDate(normalizedDate);
@@ -184,7 +182,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  // 📊 Cycle info card
+  //cycle info card
   Widget _buildCycleInfoCard() {
     DateTime? nextPeriod = _predictNextPeriod();
     int? daysUntilNext = nextPeriod?.difference(_today).inDays;
@@ -291,7 +289,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  // 📅 Calendar widget
+  //calendar widget
   Widget _buildCalendar() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -328,7 +326,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
 
           const SizedBox(height: 16),
 
-          // Weekday headers
+          //weekday headers
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
@@ -425,7 +423,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  // 📖 Legend
+  //legend
   Widget _buildLegend() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -464,7 +462,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  // 🎯 Quick actions
+  //quick actions
   Widget _buildQuickActions() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -529,7 +527,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  // Helper: Get days in month
+  //helper: Get days in month
   List<DateTime?> _getDaysInMonth(DateTime month) {
     List<DateTime?> days = [];
 
@@ -551,7 +549,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     return days;
   }
 
-  // Helper: Get month/year string
+  //helper: Get month/year string
   String _getMonthYearString(DateTime date) {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',
