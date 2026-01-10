@@ -1,5 +1,9 @@
+// 📅 lib/screens/period_tracker_screen.dart
+
 import 'package:flutter/material.dart';
-import 'package:she_bloom/constants/colors.dart';
+import '../constants/colors.dart';
+import '../services/period.service.dart';
+
 
 class PeriodTrackerScreen extends StatefulWidget {
   const PeriodTrackerScreen({super.key});
@@ -12,20 +16,29 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
   DateTime _selectedMonth = DateTime.now();
   DateTime _today = DateTime.now();
 
-  //from firebase- storing period dates
-  Set<DateTime> periodDates ={
-    DateTime(2024, 12, 10),
-    DateTime(2024, 12, 11),
-    DateTime(2024, 12, 12),
-    DateTime(2024, 12, 13),
-    DateTime(2024, 12, 14),
-  };
+  // 🔥 Firebase service
+  final PeriodService _periodService = PeriodService();
+
+  // Store period dates (loaded from Firebase)
+  Set<DateTime> periodDates = {};
+
   int averageCycleLength = 28;
+  int averagePeriodLength = 5;
   DateTime? lastPeriodStart;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _loadData();
+  }
+
+  // 🔥 Load all data from Firebase
+  Future<void> _loadData() async {
+    setState(() {
+      isLoading = true;
+    });
+
     _calculateLastPeriod();
   }
 
@@ -41,29 +54,58 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     return lastPeriodStart!.add(Duration(days: averageCycleLength));
   }
 
-  void _togglePeriodDate(DateTime date) {
-    setState(() {
-      // Normalize date (remove time)
-      DateTime normalizedDate = DateTime(date.year, date.month, date.day);
+  void _togglePeriodDate(DateTime date) async {
+    // Normalize date (remove time)
+    DateTime normalizedDate = DateTime(date.year, date.month, date.day);
 
-      if (periodDates.contains(normalizedDate)) {
-        periodDates.remove(normalizedDate);
-      } else {
+    bool wasAdded = !periodDates.contains(normalizedDate);
+
+    // Optimistic update (update UI immediately)
+    setState(() {
+      if (wasAdded) {
         periodDates.add(normalizedDate);
+      } else {
+        periodDates.remove(normalizedDate);
       }
       _calculateLastPeriod();
     });
 
-    String message = periodDates.contains(DateTime(date.year, date.month, date.day))
-        ? 'Period day added'
-        : 'Period day removed';
+    // 🔥 Save to Firebase
+    bool success;
+    if (wasAdded) {
+      success = await _periodService.savePeriodDate(normalizedDate);
+    } else {
+      success = await _periodService.removePeriodDate(normalizedDate);
+    }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+    if (success) {
+      String message = wasAdded ? 'Period day added ✅' : 'Period day removed ✅';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 1),
+          backgroundColor: wasAdded ? Colors.green : Colors.grey,
+        ),
+      );
+    } else {
+      // Revert if save failed
+      setState(() {
+        if (wasAdded) {
+          periodDates.remove(normalizedDate);
+        } else {
+          periodDates.add(normalizedDate);
+        }
+        _calculateLastPeriod();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to save. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   bool _isPeriodDay(DateTime date) {
@@ -81,7 +123,6 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
       _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -102,28 +143,37 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh, color: AppColors.darkPink),
+            onPressed: _loadData,
+          ),
+        ],
       ),
-      body: SafeArea(
+      body: isLoading
+          ? const Center(
+        child: CircularProgressIndicator(),
+      )
+          : SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-
-              //cycle info card
+              // Cycle info card
               _buildCycleInfoCard(),
 
               const SizedBox(height: 20),
 
-              //calander
+              // Calendar
               _buildCalendar(),
 
               const SizedBox(height: 20),
 
-              //legend
+              // Legend
               _buildLegend(),
 
               const SizedBox(height: 20),
 
-              //quick actions
+              // Quick actions
               _buildQuickActions(),
 
               const SizedBox(height: 20),
@@ -134,7 +184,8 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  Widget _buildCycleInfoCard(){
+  // 📊 Cycle info card
+  Widget _buildCycleInfoCard() {
     DateTime? nextPeriod = _predictNextPeriod();
     int? daysUntilNext = nextPeriod?.difference(_today).inDays;
 
@@ -240,7 +291,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  //calendar widget
+  // 📅 Calendar widget
   Widget _buildCalendar() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -252,7 +303,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
       ),
       child: Column(
         children: [
-          //month navigation
+          // Month navigation
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -277,7 +328,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
 
           const SizedBox(height: 16),
 
-          //weekday headers
+          // Weekday headers
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
@@ -374,7 +425,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  //legend
+  // 📖 Legend
   Widget _buildLegend() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -413,7 +464,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  //quick actions
+  // 🎯 Quick actions
   Widget _buildQuickActions() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -478,20 +529,20 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  //helper: Get days in month
+  // Helper: Get days in month
   List<DateTime?> _getDaysInMonth(DateTime month) {
     List<DateTime?> days = [];
 
-    //get first day of month
+    // Get first day of month
     DateTime firstDay = DateTime(month.year, month.month, 1);
     int firstWeekday = firstDay.weekday % 7; // 0 = Sunday
 
-    //add empty cells for days before month starts
+    // Add empty cells for days before month starts
     for (int i = 0; i < firstWeekday; i++) {
       days.add(null);
     }
 
-    //add all days in month
+    // Add all days in month
     int daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     for (int day = 1; day <= daysInMonth; day++) {
       days.add(DateTime(month.year, month.month, day));
@@ -500,7 +551,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     return days;
   }
 
-  //helper: get month/year string
+  // Helper: Get month/year string
   String _getMonthYearString(DateTime date) {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',

@@ -198,7 +198,7 @@ Create `firebase_options.dart` using FlutterFire CLI (auto-generated)
 - [x] Daily nutrition detail screen
 
 ### Phase 2: Core Features (In Progress)
-- [ ] Period cycle tracker with calendar
+- [x] Period cycle tracker with calendar
 - [ ] Symptom logger
 - [x] Mood tracker Health reminders/notifications
 - [ ] Data visualization (charts/graphs)
