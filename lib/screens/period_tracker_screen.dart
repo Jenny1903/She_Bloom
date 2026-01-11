@@ -37,6 +37,20 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
       isLoading = true;
     });
 
+    //load all period dates
+    Set<DateTime> loadedDates = await _periodService.loadPeriodDates();
+
+    //load cycle settings
+    Map<String, int>? settings = await _periodService.loadCycleSettings();
+
+    setState(() {
+      periodDates = loadedDates;
+      if(settings != null){
+        averageCycleLength = settings['cyecleLength'] ?? 28;
+        averagePeriodLength = settings['periodLength'] ?? 5;
+      }
+      isLoading = false;
+    });
     _calculateLastPeriod();
   }
 

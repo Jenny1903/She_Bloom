@@ -38,6 +38,7 @@ class PeriodService {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  //get period history
   Future<List<Map<String, dynamic>>> getPeriodHistory() async {
     try {
       if (userId == null) return [];
@@ -70,6 +71,7 @@ class PeriodService {
     }
   }
 
+  //remove period date
   Future<bool> removePeriodDate(DateTime date) async {
     try {
       if (userId == null) return false;
@@ -89,6 +91,76 @@ class PeriodService {
     } catch (e) {
       print('❌ Error removing period date: $e');
       return false;
+    }
+  }
+
+  //load all period dates for user
+  Future<Set<DateTime>> loadPeriodDates() async {
+    try {
+      if (userId == null) return {};
+
+      QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periodDates')
+          .get();
+
+      Set<DateTime> dates = {};
+      for (var doc in snapshot.docs) {
+        Timestamp timestamp = doc['date'] as Timestamp;
+        DateTime date = timestamp.toDate();
+        dates.add(DateTime(date.year, date.month, date.day));
+      }
+      print('✅ Loaded ${dates.length} period dates');
+      return dates;
+    } catch (e) {
+      print('❌ Error loading period dates: $e');
+      return {};
+    }
+  }
+
+  //SAVE cycle settings
+  Future<bool> saveCycleSettings({
+    required int cycleLength,
+    required int periodLength,
+  }) async {
+    try {
+      if (userId == null) return false;
+
+      await _firestore.collection('users').doc(userId).set({
+        'cycleLength': cycleLength,
+        'periodLength': periodLength,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      print('✅ Cycle settings saved');
+      return true;
+    } catch (e) {
+      print('❌ Error saving cycle settings: $e');
+      return false;
+    }
+  }
+
+  //LOAD cycle settings
+  Future<Map<String, int>?> loadCycleSettings() async {
+    try {
+      if (userId == null) return null;
+
+      DocumentSnapshot doc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .get();
+      if (doc.exists && doc.data() != null) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return {
+          'cycleLength': data['cycleLength'] ?? 28,
+          'periodLength': data['periodLength'] ?? 5,
+        };
+      }
+      return {'cycleLength': 28, 'periodLength': 5};
+    } catch (e) {
+      print('❌ Error loading cycle settings: $e');
+      return {'cycleLength': 28, 'periodLength': 5};
     }
   }
 }
