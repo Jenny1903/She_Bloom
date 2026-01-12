@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
-import '../services/period.service.dart';
+import '../services/period_service.dart';
 
 
 class PeriodTrackerScreen extends StatefulWidget {
@@ -46,7 +46,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     setState(() {
       periodDates = loadedDates;
       if(settings != null){
-        averageCycleLength = settings['cyecleLength'] ?? 28;
+        averageCycleLength = settings['cycleLength'] ?? 28;
         averagePeriodLength = settings['periodLength'] ?? 5;
       }
       isLoading = false;
@@ -275,6 +275,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
+  //buildInfoItem
   Widget _buildInfoItem({
     required IconData icon,
     required String label,
@@ -368,6 +369,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
+  //calendar grid
   Widget _buildCalendarGrid() {
     List<Widget> rows = [];
     List<DateTime?> daysInMonth = _getDaysInMonth(_selectedMonth);
@@ -392,6 +394,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     return Column(children: rows);
   }
 
+  //day cycle
   Widget _buildDayCell(DateTime? date) {
     if (date == null) {
       return const SizedBox(width: 40, height: 40);
@@ -541,7 +544,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     );
   }
 
-  //helper: Get days in month
+  //helper: get days in month
   List<DateTime?> _getDaysInMonth(DateTime month) {
     List<DateTime?> days = [];
 
@@ -563,7 +566,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     return days;
   }
 
-  //helper: Get month/year string
+  //helper: get month/year string
   String _getMonthYearString(DateTime date) {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',

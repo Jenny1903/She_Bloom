@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class PeriodService {
@@ -9,7 +8,9 @@ class PeriodService {
   //get user ID
   String? get userId => _auth.currentUser?.uid;
 
-  Future<bool> savePeriodDate(DateTime data) async {
+
+  //to save period date
+  Future<bool> savePeriodDate(DateTime date) async {
     try {
       if (userId == null) return false;
 
@@ -31,43 +32,6 @@ class PeriodService {
     } catch (e) {
       print('❌ Error saving period date: $e');
       return false;
-    }
-  }
-
-  String _dateToString(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-
-  //get period history
-  Future<List<Map<String, dynamic>>> getPeriodHistory() async {
-    try {
-      if (userId == null) return [];
-
-      DateTime sixMonthsAgo = DateTime.now().subtract(
-        const Duration(days: 180),
-      );
-
-      QuerySnapshot snapshot = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('periodDates')
-          .where(
-            'date',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(sixMonthsAgo),
-          )
-          .orderBy('date', descending: true)
-          .get();
-
-      List<Map<String, dynamic>> history = [];
-      for (var doc in snapshot.docs) {
-        Timestamp timestamp = doc['date'] as Timestamp;
-        history.add({'date': timestamp.toDate(), 'id': doc.id});
-      }
-
-      return history;
-    } catch (e) {
-      print('❌ Error getting history: $e');
-      return [];
     }
   }
 
@@ -119,6 +83,36 @@ class PeriodService {
     }
   }
 
+  //load period dates for specific month
+  Future<Set<DateTime>> loadPeriodDatesForMonth(DateTime month) async {
+    try{
+      if(userId == null) return {};
+
+      DateTime startOfMonth = DateTime(month.year, month.month, 1);
+      DateTime endOfMonth = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
+
+      QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periodDates')
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+          .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth))
+          .get();
+
+      Set<DateTime> dates = {};
+      for (var doc in snapshot.docs) {
+        Timestamp timestamp = doc['date'] as Timestamp;
+        DateTime date = timestamp.toDate();
+        dates.add(DateTime(date.year, date.month, date.day));
+      }
+
+      return dates;
+    } catch (e) {
+      print('❌ Error loading month dates: $e');
+      return {};
+    }
+  }
+
   //SAVE cycle settings
   Future<bool> saveCycleSettings({
     required int cycleLength,
@@ -163,4 +157,64 @@ class PeriodService {
       return {'cycleLength': 28, 'periodLength': 5};
     }
   }
+
+  //to convert datetime to string key
+  String _dateToString(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+  //get last period start date
+  Future<DateTime?> getLastPeriodStart() async{
+    try{
+      if(userId == null) return null;
+
+      QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periodDates')
+          .orderBy('date', descending: true)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) return null;
+      Timestamp timestamp = snapshot.docs.first['date'] as Timestamp;
+      return timestamp.toDate();
+    }catch (e) {
+      print('❌ Error getting last period: $e');
+      return null;
+  }
+  }
+
+  //get period history(last 6 months)
+  Future<List<Map<String, dynamic>>> getPeriodHistory() async {
+    try {
+      if (userId == null) return [];
+
+      DateTime sixMonthsAgo = DateTime.now().subtract(
+        const Duration(days: 180),
+      );
+
+      QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periodDates')
+          .where(
+        'date',
+        isGreaterThanOrEqualTo: Timestamp.fromDate(sixMonthsAgo),
+      )
+          .orderBy('date', descending: true)
+          .get();
+
+      List<Map<String, dynamic>> history = [];
+      for (var doc in snapshot.docs) {
+        Timestamp timestamp = doc['date'] as Timestamp;
+        history.add({'date': timestamp.toDate(), 'id': doc.id});
+      }
+
+      return history;
+    } catch (e) {
+      print('❌ Error getting history: $e');
+      return [];
+    }
+  }
+
 }
