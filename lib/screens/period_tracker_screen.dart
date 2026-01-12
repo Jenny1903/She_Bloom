@@ -61,10 +61,95 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
     }
   }
 
+  //calculate actual average period length from logs
+  int _calculateAveragePeriodLength() {
+    if (periodDates.isEmpty) return averagePeriodLength; // Default to 5
+
+    // Group consecutive dates into periods
+    List<DateTime> sortedDates = periodDates.toList()..sort();
+    List<List<DateTime>> periods = [];
+    List<DateTime> currentPeriod = [sortedDates.first];
+
+    for (int i = 1; i < sortedDates.length; i++) {
+      DateTime current = sortedDates[i];
+      DateTime previous = sortedDates[i - 1];
+
+      // If dates are consecutive (1 day apart), same period
+      if (current.difference(previous).inDays == 1) {
+        currentPeriod.add(current);
+      } else {
+        // New period started
+        if (currentPeriod.isNotEmpty) {
+          periods.add(List.from(currentPeriod));
+        }
+        currentPeriod = [current];
+      }
+    }
+
+    // Add last period
+    if (currentPeriod.isNotEmpty) {
+      periods.add(currentPeriod);
+    }
+
+    // Calculate average length
+    if (periods.isEmpty) return averagePeriodLength;
+
+    int totalDays = 0;
+    for (var period in periods) {
+      totalDays += period.length;
+    }
+
+    int calculatedAverage = (totalDays / periods.length).round();
+
+    // Return calculated average (min 3, max 10 for safety)
+    return calculatedAverage.clamp(3, 10);
+  }
+
+  //calculate actual average cycle length from logs
+  int _calculateAverageCycleLength() {
+    if (periodDates.isEmpty) return averageCycleLength; // Default to 28
+
+    // Group consecutive dates into periods
+    List<DateTime> sortedDates = periodDates.toList()..sort();
+    List<DateTime> periodStarts = [];
+    DateTime? lastDate;
+
+    for (int i = 0; i < sortedDates.length; i++) {
+      DateTime current = sortedDates[i];
+
+      // If this is first date or gap > 1 day, it's a period start
+      if (lastDate == null || current.difference(lastDate).inDays > 1) {
+        periodStarts.add(current);
+      }
+      lastDate = current;
+    }
+
+    // Need at least 2 periods to calculate cycle
+    if (periodStarts.length < 2) return averageCycleLength;
+
+    // Calculate days between each period start
+    List<int> cycleLengths = [];
+    for (int i = 1; i < periodStarts.length; i++) {
+      int days = periodStarts[i].difference(periodStarts[i - 1]).inDays;
+      cycleLengths.add(days);
+    }
+
+    // Calculate average
+    int totalDays = cycleLengths.reduce((a, b) => a + b);
+    int calculatedAverage = (totalDays / cycleLengths.length).round();
+
+    // Return calculated average (min 21, max 35 for safety)
+    return calculatedAverage.clamp(21, 35);
+  }
+
   DateTime? _predictNextPeriod() {
     if (lastPeriodStart == null) return null;
     return lastPeriodStart!.add(Duration(days: averageCycleLength));
   }
+
+
+
+
 
   void _togglePeriodDate(DateTime date) async {
     // Normalize date (remove time)
