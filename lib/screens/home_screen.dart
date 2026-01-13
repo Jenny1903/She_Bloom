@@ -12,6 +12,7 @@ import 'workout_yoga_screen.dart';
 import 'healthy_choices_screen.dart';
 import 'reminder_screen.dart';
 import 'period_tracker_screen.dart';
+import 'symptom_logger_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -267,11 +268,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //third-row cards (Mood Tracker, another card)
+  //carousel and symptom widget
   Widget _buildThirdRowCards() {
     return Row(
       children: [
-
         Expanded(
           child: MoodCarouselCard(
             title: 'Mood\nTracker',
@@ -280,10 +280,30 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const MoodTrackerScreen()),
+                  builder: (context) => const MoodTrackerScreen(),
+                ),
               );
             },
             height: 150,
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        Expanded(
+          child: CategoryCard(
+            title: 'Symptom\nLogger',
+            icon: Icons.healing,
+            backgroundColor: AppColors.coral,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SymptomLoggerScreen(),
+                ),
+              );
+            },
+            height: 150, // keep same height for symmetry
           ),
         ),
       ],
