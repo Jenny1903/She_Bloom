@@ -14,6 +14,38 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
   String notes = '';
 
   //categories of symptoms with icons
+  final Map<String, List<Map<String, dynamic>>> symptomCategories = {
+    '💢 Pain': [
+      {'name': 'Cramps', 'icon': Icons.healing},
+      {'name': 'Headache', 'icon': Icons.psychology},
+      {'name': 'Back Pain', 'icon': Icons.airline_seat_recline_normal},
+      {'name': 'Breast Tenderness', 'icon': Icons.favorite_border},
+    ],
+    '🍽️ Digestive': [
+      {'name': 'Bloating', 'icon': Icons.bubble_chart},
+      {'name': 'Nausea', 'icon': Icons.sick},
+      {'name': 'Constipation', 'icon': Icons.warning_amber},
+      {'name': 'Diarrhea', 'icon': Icons.report_problem},
+    ],
+    '✨ Skin': [
+      {'name': 'Acne', 'icon': Icons.circle},
+      {'name': 'Oily Skin', 'icon': Icons.water_drop},
+      {'name': 'Dry Skin', 'icon': Icons.dry},
+    ],
+    '😊 Mood': [
+      {'name': 'Mood Swings', 'icon': Icons.mood_bad},
+      {'name': 'Irritability', 'icon': Icons.sentiment_dissatisfied},
+      {'name': 'Anxiety', 'icon': Icons.psychology_alt},
+      {'name': 'Sadness', 'icon': Icons.sentiment_very_dissatisfied},
+    ],
+    '⚡ Energy': [
+      {'name': 'Fatigue', 'icon': Icons.battery_0_bar},
+      {'name': 'Insomnia', 'icon': Icons.bedtime_off},
+      {'name': 'Low Energy', 'icon': Icons.trending_down},
+    ],
+  };
+
+
   void _toggleSymptom(String symptomName) {
     setState(() {
       if (selectedSymptoms.contains(symptomName)) {
@@ -34,7 +66,8 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
       );
       return;
     }
-    // TODO: Save to Firebase later
+
+    //Save to Firebase later
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${selectedSymptoms.length} symptoms logged!'),
@@ -42,7 +75,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
       ),
     );
 
-    // Clear selection
+    //clear selection
     setState(() {
       selectedSymptoms.clear();
       notes = '';
@@ -73,7 +106,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
         child: Column(
           children: [
             // Date selector
-
+            _buildDateSelector(),
 
             // Scrollable symptoms list
             Expanded(
@@ -88,12 +121,17 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
                     const SizedBox(height: 20),
 
                     // Symptom categories
-
+                    ...symptomCategories.entries.map((category){
+                      return _buildCategorySection(
+                      category.key,
+                      category.value,
+                     );
+                    }).toList(),
 
                     const SizedBox(height: 20),
 
                     // Notes section
-
+                    _buildNotesSection(),
 
                     const SizedBox(height: 20),
                   ],
@@ -132,6 +170,61 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
       ],
     );
   }
+  //date selector
+  Widget _buildDateSelector(){
+    return Container(
+    padding: const EdgeInsets.all(16),
+    margin: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: AppColors.lightPink,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Log symptoms for',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textMedium,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _formatDate(selectedDate),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.darkGrey,
+              ),
+            ),
+          ],
+        ),
+        IconButton(
+          icon: Icon(Icons.calendar_today, color: AppColors.darkPink),
+          onPressed: () async {
+            DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: selectedDate,
+              firstDate: DateTime(2020),
+              lastDate: DateTime.now(),
+            );
+            if (picked != null) {
+              setState(() {
+                selectedDate = picked;
+              });
+            }
+          },
+        ),
+      ],
+    ),
+  );
+
+  }
+
 
   //summary card (shows selected count)
   Widget _buildSummaryCard() {
@@ -189,7 +282,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
     );
   }
 
-  // ✅ Individual symptom tile
+  //individual symptom tile
   Widget _buildSymptomTile(String symptomName, IconData icon) {
     bool isSelected = selectedSymptoms.contains(symptomName);
 
@@ -222,6 +315,40 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
         checkColor: Colors.white,
         controlAffinity: ListTileControlAffinity.trailing,
       ),
+    );
+  }
+
+  //Notes section
+  Widget _buildNotesSection(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '📝 Additional Notes (Optional)',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkGrey,
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          maxLines: 4,
+          onChanged: (value) {
+            notes = value;
+          },
+          decoration: InputDecoration(
+            hintText: 'Any other symptoms or details...',
+            hintStyle: TextStyle(color: AppColors.textLight),
+            filled: true,
+            fillColor: Colors.grey[100],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -263,6 +390,14 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date){
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
 }
