@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:she_bloom/constants/colors.dart';
+import 'dart:ui';
 
 class SymptomLoggerScreen extends StatefulWidget {
   const SymptomLoggerScreen({super.key});
@@ -13,38 +13,57 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
   Set<String> selectedSymptoms = {};
   String notes = '';
 
-  //categories of symptoms with icons
-  final Map<String, List<Map<String, dynamic>>> symptomCategories = {
-    '💢 Pain': [
-      {'name': 'Cramps', 'icon': Icons.healing},
-      {'name': 'Headache', 'icon': Icons.psychology},
-      {'name': 'Back Pain', 'icon': Icons.airline_seat_recline_normal},
-      {'name': 'Breast Tenderness', 'icon': Icons.favorite_border},
-    ],
-    '🍽️ Digestive': [
-      {'name': 'Bloating', 'icon': Icons.bubble_chart},
-      {'name': 'Nausea', 'icon': Icons.sick},
-      {'name': 'Constipation', 'icon': Icons.warning_amber},
-      {'name': 'Diarrhea', 'icon': Icons.report_problem},
-    ],
-    '✨ Skin': [
-      {'name': 'Acne', 'icon': Icons.circle},
-      {'name': 'Oily Skin', 'icon': Icons.water_drop},
-      {'name': 'Dry Skin', 'icon': Icons.dry},
-    ],
-    '😊 Mood': [
-      {'name': 'Mood Swings', 'icon': Icons.mood_bad},
-      {'name': 'Irritability', 'icon': Icons.sentiment_dissatisfied},
-      {'name': 'Anxiety', 'icon': Icons.psychology_alt},
-      {'name': 'Sadness', 'icon': Icons.sentiment_very_dissatisfied},
-    ],
-    '⚡ Energy': [
-      {'name': 'Fatigue', 'icon': Icons.battery_0_bar},
-      {'name': 'Insomnia', 'icon': Icons.bedtime_off},
-      {'name': 'Low Energy', 'icon': Icons.trending_down},
-    ],
-  };
-
+  // 🎨 Symptoms with beautiful gradient colors
+  final List<Map<String, dynamic>> symptoms = [
+    {
+      'name': 'Cramps',
+      'gradient': [Color(0xFFE91E63), Color(0xFFF48FB1)], // Pink
+    },
+    {
+      'name': 'Headache',
+      'gradient': [Color(0xFF9C27B0), Color(0xFFCE93D8)], // Purple
+    },
+    {
+      'name': 'Bloating',
+      'gradient': [Color(0xFF00BCD4), Color(0xFF80DEEA)], // Cyan
+    },
+    {
+      'name': 'Fatigue',
+      'gradient': [Color(0xFF673AB7), Color(0xFFB39DDB)], // Deep Purple
+    },
+    {
+      'name': 'Nausea',
+      'gradient': [Color(0xFFFF9800), Color(0xFFFFCC80)], // Orange
+    },
+    {
+      'name': 'Back Pain',
+      'gradient': [Color(0xFF3F51B5), Color(0xFF9FA8DA)], // Indigo
+    },
+    {
+      'name': 'Mood Swings',
+      'gradient': [Color(0xFFE91E63), Color(0xFFFF80AB)], // Hot Pink
+    },
+    {
+      'name': 'Acne',
+      'gradient': [Color(0xFFFF5722), Color(0xFFFFAB91)], // Deep Orange
+    },
+    {
+      'name': 'Anxiety',
+      'gradient': [Color(0xFF2196F3), Color(0xFF90CAF9)], // Blue
+    },
+    {
+      'name': 'Insomnia',
+      'gradient': [Color(0xFF9C27B0), Color(0xFFE1BEE7)], // Purple Light
+    },
+    {
+      'name': 'Tender Breasts',
+      'gradient': [Color(0xFFE91E63), Color(0xFFF8BBD0)], // Pink Light
+    },
+    {
+      'name': 'Low Energy',
+      'gradient': [Color(0xFFFF9800), Color(0xFFFFE0B2)], // Amber
+    },
+  ];
 
   void _toggleSymptom(String symptomName) {
     setState(() {
@@ -58,346 +77,381 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
 
   void _saveSymptoms() {
     if (selectedSymptoms.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one symptom'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showMessage('Please select at least one symptom', isError: true);
       return;
     }
 
-    //Save to Firebase later
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${selectedSymptoms.length} symptoms logged!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    // TODO: Save to Firebase
+    _showMessage('${selectedSymptoms.length} symptoms logged! ✨', isError: false);
 
-    //clear selection
+    // Clear selection
     setState(() {
       selectedSymptoms.clear();
       notes = '';
     });
   }
 
+  void _showMessage(String message, {required bool isError}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red.shade400 : Colors.green.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.darkGrey),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Symptom Logger',
-          style: TextStyle(
-            color: AppColors.darkGrey,
-            fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF8BBD0), // Light Pink
+              Color(0xFFE1BEE7), // Light Purple
+              Color(0xFFB2DFDB), // Light Teal
+            ],
           ),
         ),
-        centerTitle: true,
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildAppBar(),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 24),
+                      _buildDateCard(),
+                      const SizedBox(height: 32),
+                      _buildSymptomGrid(),
+                      const SizedBox(height: 32),
+                      _buildNotesCard(),
+                      const SizedBox(height: 24),
+                      _buildSaveButton(),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Date selector
-            _buildDateSelector(),
+    );
+  }
 
-            // Scrollable symptoms list
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+  // 🎯 App bar
+  Widget _buildAppBar() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios, size: 24),
+            onPressed: () => Navigator.pop(context),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.3),
+              padding: const EdgeInsets.all(12),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.more_vert, size: 24),
+            onPressed: () {},
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.3),
+              padding: const EdgeInsets.all(12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 📝 Header
+  Widget _buildHeader() {
+    return const Text(
+      'How are you\nfeeling today?',
+      style: TextStyle(
+        fontSize: 36,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+        height: 1.2,
+      ),
+    );
+  }
+
+  // 📅 Date card
+  Widget _buildDateCard() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.5),
+                Colors.white.withOpacity(0.3),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.6),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.calendar_today, color: Colors.black54),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Summary card
-                    if (selectedSymptoms.isNotEmpty) _buildSummaryCard(),
-
-                    const SizedBox(height: 20),
-
-                    // Symptom categories
-                    ...symptomCategories.entries.map((category){
-                      return _buildCategorySection(
-                      category.key,
-                      category.value,
-                     );
-                    }).toList(),
-
-                    const SizedBox(height: 20),
-
-                    // Notes section
-                    _buildNotesSection(),
-
-                    const SizedBox(height: 20),
+                    Text(
+                      'Today',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDate(selectedDate),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-
-            // Save button
-            _buildSaveButton(),
-          ],
+              if (selectedSymptoms.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFE91E63), Color(0xFFF48FB1)],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${selectedSymptoms.length} ✓',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
-  //category section
-  Widget _buildCategorySection(String categoryName, List<Map<String, dynamic>> symptoms) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Text(
-            categoryName,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkGrey,
-            ),
-          ),
-        ),
-        ...symptoms.map((symptom) => _buildSymptomTile(
+
+  // 🎨 Symptom grid
+  Widget _buildSymptomGrid() {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: symptoms.map((symptom) {
+        bool isSelected = selectedSymptoms.contains(symptom['name']);
+        return _buildSymptomChip(
           symptom['name'] as String,
-          symptom['icon'] as IconData,
-        )).toList(),
-        const SizedBox(height: 24),
-      ],
+          symptom['gradient'] as List<Color>,
+          isSelected,
+        );
+      }).toList(),
     );
   }
-  //date selector
-  Widget _buildDateSelector(){
-    return Container(
-    padding: const EdgeInsets.all(16),
-    margin: const EdgeInsets.all(20),
-    decoration: BoxDecoration(
-      color: AppColors.lightPink,
-      borderRadius: BorderRadius.circular(16),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+
+  // 💊 Individual symptom chip
+  Widget _buildSymptomChip(String name, List<Color> gradient, bool isSelected) {
+    return GestureDetector(
+      onTap: () => _toggleSymptom(name),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? LinearGradient(colors: gradient)
+              : LinearGradient(
+            colors: [
+              Colors.white.withOpacity(0.4),
+              Colors.white.withOpacity(0.2),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: isSelected
+                ? Colors.white.withOpacity(0.8)
+                : Colors.white.withOpacity(0.4),
+            width: 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+            BoxShadow(
+              color: gradient[0].withOpacity(0.4),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ]
+              : [],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Log symptoms for',
+              name,
               style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textMedium,
+                fontSize: 15,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? Colors.white : Colors.black87,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              _formatDate(selectedDate),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.darkGrey,
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.check_circle,
+                color: Colors.white,
+                size: 18,
               ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 📝 Notes card
+  Widget _buildNotesCard() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.5),
+                Colors.white.withOpacity(0.3),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.6),
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.edit_note, size: 20, color: Colors.black54),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Additional Notes',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                maxLines: 3,
+                onChanged: (value) => notes = value,
+                style: const TextStyle(color: Colors.black87),
+                decoration: InputDecoration(
+                  hintText: 'How are you feeling? Any details...',
+                  hintStyle: TextStyle(color: Colors.black.withOpacity(0.4)),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 💾 Save button
+  Widget _buildSaveButton() {
+    return GestureDetector(
+      onTap: _saveSymptoms,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: selectedSymptoms.isEmpty
+                ? [Colors.grey.shade400, Colors.grey.shade500]
+                : [Color(0xFFE91E63), Color(0xFFF48FB1)],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: (selectedSymptoms.isEmpty ? Colors.grey : Color(0xFFE91E63))
+                  .withOpacity(0.4),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
-        IconButton(
-          icon: Icon(Icons.calendar_today, color: AppColors.darkPink),
-          onPressed: () async {
-            DateTime? picked = await showDatePicker(
-              context: context,
-              initialDate: selectedDate,
-              firstDate: DateTime(2020),
-              lastDate: DateTime.now(),
-            );
-            if (picked != null) {
-              setState(() {
-                selectedDate = picked;
-              });
-            }
-          },
-        ),
-      ],
-    ),
-  );
-
-  }
-
-
-  //summary card (shows selected count)
-  Widget _buildSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.darkPink, AppColors.coral],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.check_circle,
-              color: Colors.white,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${selectedSymptoms.length} Symptoms Selected',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                Text(
-                  selectedSymptoms.join(', '),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //individual symptom tile
-  Widget _buildSymptomTile(String symptomName, IconData icon) {
-    bool isSelected = selectedSymptoms.contains(symptomName);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? AppColors.lightPink : Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSelected ? AppColors.darkPink : Colors.transparent,
-          width: 2,
-        ),
-      ),
-      child: CheckboxListTile(
-        value: isSelected,
-        onChanged: (value) => _toggleSymptom(symptomName),
-        title: Text(
-          symptomName,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            color: isSelected ? AppColors.darkPink : AppColors.darkGrey,
-          ),
-        ),
-        secondary: Icon(
-          icon,
-          color: isSelected ? AppColors.darkPink : AppColors.mediumGrey,
-        ),
-        activeColor: AppColors.darkPink,
-        checkColor: Colors.white,
-        controlAffinity: ListTileControlAffinity.trailing,
-      ),
-    );
-  }
-
-  //Notes section
-  Widget _buildNotesSection(){
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '📝 Additional Notes (Optional)',
-          style: TextStyle(
+        child: Text(
+          selectedSymptoms.isEmpty
+              ? 'Select Symptoms'
+              : 'Save ${selectedSymptoms.length} Symptoms',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: AppColors.darkGrey,
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          maxLines: 4,
-          onChanged: (value) {
-            notes = value;
-          },
-          decoration: InputDecoration(
-            hintText: 'Any other symptoms or details...',
-            hintStyle: TextStyle(color: AppColors.textLight),
-            filled: true,
-            fillColor: Colors.grey[100],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  //save button
-  Widget _buildSaveButton() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 50,
-        child: ElevatedButton(
-          onPressed: _saveSymptoms,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.darkPink,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: Text(
-            selectedSymptoms.isEmpty
-                ? 'Select Symptoms to Save'
-                : 'Save ${selectedSymptoms.length} Symptoms',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            color: Colors.white,
           ),
         ),
       ),
     );
   }
 
-  String _formatDate(DateTime date){
+  String _formatDate(DateTime date) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
-
 }
