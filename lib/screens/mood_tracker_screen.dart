@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
+import 'dart:ui';
 
 class MoodTrackerScreen extends StatefulWidget {
   const MoodTrackerScreen({super.key});
@@ -8,384 +9,653 @@ class MoodTrackerScreen extends StatefulWidget {
   State<MoodTrackerScreen> createState() => _MoodTrackerScreenState();
 }
 
-class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
+class _MoodTrackerScreenState extends State<MoodTrackerScreen>
+    with SingleTickerProviderStateMixin {
+  DateTime selectedDate = DateTime.now();
   String? selectedMood;
   String notes = '';
-  DateTime selectedDate = DateTime.now();
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
 
   //mood options with emojis and colors
   final List<Map<String, dynamic>> moods = [
-    {'emoji': '🥰', 'name': 'Happy', 'color': Color(0xFF4CAF50)},
-    {'emoji': '😌', 'name': 'Calm', 'color': Color(0xFF2196F3)},
-    {'emoji': '😊', 'name': 'Okay', 'color': Color(0xFF9E9E9E)},
-    {'emoji': '😔', 'name': 'Sad', 'color': Color(0xFF607D8B)},
-    {'emoji': '😢', 'name': 'Crying', 'color': Color(0xFF5C6BC0)},
-    {'emoji': '😡', 'name': 'Angry', 'color': Color(0xFFF44336)},
-    {'emoji': '😰', 'name': 'Anxious', 'color': Color(0xFFFF9800)},
-    {'emoji': '😴', 'name': 'Tired', 'color': Color(0xFF795548)},
+    {
+      'name': 'Very Pleasant',
+      'emoji': '😊',
+      'gradient': [Color(0xFFFF6B6B), Color(0xFFFFB6B9)],
+      'bgColor': Color(0xFFFFE5E5),
+    },
+    {
+      'name': 'Pleasant',
+      'emoji': '🙂',
+      'gradient': [Color(0xFFFFA726), Color(0xFFFFD54F)], // Orange/Yellow
+      'bgColor': Color(0xFFFFF3E0),
+    },
+    {
+      'name': 'Neutral',
+      'emoji': '😐',
+      'gradient': [Color(0xFF42A5F5), Color(0xFF90CAF9)], // Blue
+      'bgColor': Color(0xFFE3F2FD),
+    },
+    {
+      'name': 'Unpleasant',
+      'emoji': '😕',
+      'gradient': [Color(0xFF7E57C2), Color(0xFFB39DDB)], // Purple
+      'bgColor': Color(0xFFF3E5F5),
+    },
+    {
+      'name': 'Very Unpleasant',
+      'emoji': '😢',
+      'gradient': [Color(0xFF5C6BC0), Color(0xFF9FA8DA)], // Indigo
+      'bgColor': Color(0xFFE8EAF6),
+    },
+    {
+      'name': 'Calm',
+      'emoji': '😌',
+      'gradient': [Color(0xFF26A69A), Color(0xFF80CBC4)], // Teal
+      'bgColor': Color(0xFFE0F2F1),
+    },
   ];
 
-  void _saveMood() {
-    if (selectedMood == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a mood'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    // TODO: Save to Firebase/database
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Mood saved: $selectedMood'),
-        backgroundColor: Colors.green,
-      ),
+  @override
+  void initState(){
+    super.initState();
+    _animationController = AnimationController(
+        duration: const Duration(milliseconds: 400),
+        vsync: this,
     );
-
-    //clear selection
-    setState(() {
-      selectedMood = null;
-      notes = '';
-    });
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.darkGrey),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Mood Tracker',
-          style: TextStyle(
-            color: AppColors.darkGrey,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Date selector
-              _buildDateSelector(),
-        
-              const SizedBox(height: 30),
-        
-              // "How are you feeling?" header
-              Text(
-                'How are you feeling today?',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.darkGrey,
-                ),
-              ),
-        
-              const SizedBox(height: 20),
-        
-              // Mood grid
-              _buildMoodGrid(),
-        
-              const SizedBox(height: 30),
-        
-              // Notes section
-              _buildNotesSection(),
-        
-              const SizedBox(height: 30),
-        
-              // Save button
-              _buildSaveButton(),
-        
-              const SizedBox(height: 30),
-        
-              // Recent mood history
-              _buildRecentMoods(),
-
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
+  void disposse(){
+    _animationController.dispose();
+    super.dispose();
   }
 
-  //date selector
-  Widget _buildDateSelector() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightPink,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
+  void _selectMood(String moodName){
+    setState(() {
+      if (selectedMood == moodName) {
+        selectedMood = null;
+        _animationController.reverse();
+      } else {
+        selectedMood = moodName;
+        _animationController.forward();
+      }
+    });
+  }
+
+  void _saveMood() {
+      if (selectedMood == null) {
+        _showMessage('Please select how you\'re feeling', isError: true);
+        return;
+      }
+
+      // TODO: Save to Firebase
+      _showMessage('Mood logged successfully! ✨', isError: false);
+
+      setState(() {
+        selectedMood = null;
+        notes = '';
+        _animationController.reverse();
+      });
+    }
+
+    void _showMessage(String message, {required bool isError}){
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message),
+          backgroundColor: isError ? Colors.red.shade400 : Colors.green.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+      );
+    }
+
+ @override
+ Widget build (BuildContext context) {
+   return Scaffold(
+     body: Container(
+       decoration: BoxDecoration(
+         gradient: LinearGradient(
+           begin: Alignment.topLeft,
+           end: Alignment.bottomRight,
+           colors: [
+             Color(0xFFF8BBD0), // Light Pink
+             Color(0xFFE1BEE7), // Light Purple
+             Color(0xFFB2DFDB), // Light Teal
+           ],
+         ),
+       ),
+       child: SafeArea(
+         child: Column(
+           children: [
+             _buildAppBar(),
+             Expanded(
+               child: SingleChildScrollView(
+                 physics: const BouncingScrollPhysics(),
+                 padding: const EdgeInsets.all(20),
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     _buildHeader(),
+                     const SizedBox(height: 24),
+                     _buildDateCard(),
+                     const SizedBox(height: 32),
+                     _buildMoodBubbles(),
+                     const SizedBox(height: 32),
+                     if (selectedMood != null) ...[
+                       _buildNotesCard(),
+                       const SizedBox(height: 24),
+                       _buildSaveButton(),
+                       const SizedBox(height: 32),
+                     ],
+                     _buildWeeklyChart(),
+                     const SizedBox(height: 20),
+                   ],
+                 ),
+               ),
+             ),
+           ],
+         ),
+       ),
+     ),
+   );
+ }
+
+ //appBar
+ Widget _buildAppBar(){
+    return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Today',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textMedium,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${_getMonthName(selectedDate.month)} ${selectedDate.day}, ${selectedDate.year}',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.darkGrey,
-                ),
-              ),
-            ],
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios, size: 24),
+            onPressed: () => Navigator.pop(context),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.3),
+              padding: const EdgeInsets.all(12),
+            ),
           ),
           IconButton(
-            icon: Icon(Icons.calendar_today, color: AppColors.darkPink),
-            onPressed: () async {
-              DateTime? picked = await showDatePicker(
-                context: context,
-                initialDate: selectedDate,
-                firstDate: DateTime(2020),
-                lastDate: DateTime.now(),
-              );
-              if (picked != null) {
-                setState(() {
-                  selectedDate = picked;
-                });
-              }
-            },
+            icon: const Icon(Icons.more_vert, size: 24),
+            onPressed: () {},
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.3),
+              padding: const EdgeInsets.all(12),
+            ),
           ),
         ],
       ),
     );
-  }
+ }
 
-  //mood grid
-  Widget _buildMoodGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.85,
+ //header
+ Widget _buildHeader(){
+    return const Text(
+      'How are you\nfeeling today?',
+      style: TextStyle(
+        fontSize: 36,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+        height: 1.2,
       ),
-      itemCount: moods.length,
-      itemBuilder: (context, index) {
-        final mood = moods[index];
-        final isSelected = selectedMood == mood['name'];
+    );
+ }
 
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              selectedMood = mood['name'];
-            });
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? mood['color'].withOpacity(0.2)
-                  : Colors.grey[100],
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected
-                    ? mood['color']
-                    : Colors.transparent,
-                width: 2,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  mood['emoji'],
-                  style: TextStyle(fontSize: 40),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  mood['name'],
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? mood['color'] : AppColors.darkGrey,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+ //date card
+  Widget _buildDateCard(){
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.5),
+                Colors.white.withOpacity(0.3),
               ],
             ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.6),
+              width: 1.5,
+            ),
           ),
-        );
-      },
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.calendar_today, color: Colors.black54),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Today',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDate(selectedDate),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  //notes section
-  Widget _buildNotesSection() {
+  //mood bubbles with expnad animation
+  Widget _buildMoodBubbles(){
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      children: moods.map((mood) {
+        bool isSelected = selectedMood == mood['name'];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _buildMoodBubble(mood, isSelected),
+        );
+      }).toList(),
+    );
+  }
+
+  //mood bar for chart
+  Widget _buildMoodBubble(Map<String, dynamic> mood, bool isSelected) {
+    return GestureDetector(
+      onTap: () => _selectMood(mood['name'] as String),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        height: isSelected ? 160 : 80,
+        decoration: BoxDecoration(
+          color: mood['bgColor'],
+          borderRadius: BorderRadius.circular(isSelected ? 30 : 40),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.6),
+            width: isSelected ? 2 : 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+            BoxShadow(
+              color: (mood['gradient'][0] as Color).withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ]
+              : [],
+        ),
+        child: Stack(
+          children: [
+            // Gradient overlay when selected
+            if (isSelected)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        (mood['gradient'][0] as Color).withOpacity(0.2),
+                        (mood['gradient'][1] as Color).withOpacity(0.1),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: isSelected
+                  ? _buildExpandedMoodContent(mood)
+                  : _buildCollapsedMoodContent(mood),
+            ),
+          ],
+        ),
+      ),
+    );
+
+  }
+
+  //collapsed bubble content
+  Widget _buildCollapsedMoodContent(Map<String, dynamic> mood){
+    return Row(
       children: [
-        Text(
-          'Add a note (optional)',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.darkGrey,
+        //Emoji circle
+        Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: mood['gradient'] as List<Color>,
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: (mood['gradient'][0] as Color).withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              mood['emoji'] as String,
+              style: const TextStyle(fontSize: 28),
+            ),
           ),
         ),
-        const SizedBox(height: 12),
-        TextField(
-          maxLines: 4,
-          onChanged: (value) {
-            notes = value;
-          },
-          decoration: InputDecoration(
-            hintText: 'What\'s on your mind?',
-            hintStyle: TextStyle(color: AppColors.textLight),
-            filled: true,
-            fillColor: Colors.grey[100],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
+
+        const SizedBox(width: 16),
+        //mood name
+        Expanded(
+          child: Text(
+            mood['name'] as String,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
         ),
       ],
+    );
+  }
+
+  //expanded bubble content
+  Widget _buildExpandedMoodContent(Map<String, dynamic> mood){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Large emoji
+        Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: mood['gradient'] as List<Color>,
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: (mood['gradient'][0] as Color).withOpacity(0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              mood['emoji'] as String,
+              style: const TextStyle(fontSize: 40),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Mood name
+        Text(
+          mood['name'] as String,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  //notes card
+  Widget _buildNotesCard() {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withOpacity(0.5),
+                  Colors.white.withOpacity(0.3),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.6),
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.edit_note, size: 20, color: Colors.black54),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'What\'s on your mind?',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  maxLines: 3,
+                  onChanged: (value) => notes = value,
+                  style: const TextStyle(color: Colors.black87),
+                  decoration: InputDecoration(
+                    hintText: 'Share your thoughts... (optional)',
+                    hintStyle: TextStyle(color: Colors.black.withOpacity(0.4)),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   //save button
   Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: _saveMood,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.darkPink,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: GestureDetector(
+        onTap: _saveMood,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFE91E63), Color(0xFFF48FB1)],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0xFFE91E63).withOpacity(0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-        ),
-        child: const Text(
-          'Save Mood',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+          child: const Text(
+            'Save Mood',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
     );
   }
 
-  //recent moods
-  Widget _buildRecentMoods() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'This Week',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.darkGrey,
-              ),
+  //weekly mood chart
+  Widget _buildWeeklyChart() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.5),
+                Colors.white.withOpacity(0.3),
+              ],
             ),
-            TextButton(
-              onPressed: () {
-                // TODO: Show full history
-              },
-              child: Text(
-                'See All',
-                style: TextStyle(
-                  color: AppColors.darkPink,
-                  fontWeight: FontWeight.w600,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.6),
+              width: 1.5,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'This Week\'s Mood',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      'See All',
+                      style: TextStyle(
+                        color: Color(0xFFE91E63),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Chart bars
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _buildMoodBar('Mon', '😊', 0.8, Color(0xFFFF6B6B)),
+                  _buildMoodBar('Tue', '😌', 0.6, Color(0xFF26A69A)),
+                  _buildMoodBar('Wed', '😐', 0.4, Color(0xFF42A5F5)),
+                  _buildMoodBar('Thu', '😕', 0.7, Color(0xFF7E57C2)),
+                  _buildMoodBar('Fri', '😢', 0.3, Color(0xFF5C6BC0)),
+                  _buildMoodBar('Sat', '🙂', 0.85, Color(0xFFFFA726)),
+                  _buildMoodBar('Sun', '😊', 0.9, Color(0xFFFF6B6B)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  '🌟 Your mood is getting better!',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black.withOpacity(0.6),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        //weekly mood chart
-        Container(
-          height: 120,
-          decoration: BoxDecoration(
-            color: AppColors.lightPink.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              _buildMoodBar('Mon', '😊', 0.8),
-              _buildMoodBar('Tue', '😌', 0.6),
-              _buildMoodBar('Wed', '😐', 0.4),
-              _buildMoodBar('Thu', '😡', 0.9),
-              _buildMoodBar('Fri', '😔', 0.3),
-              _buildMoodBar('Sat', '🥰', 0.85),
-              _buildMoodBar('Sun', '😌', 0.7),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  //individual mood bar
+  Widget _buildMoodBar(String day, String emoji, double height, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 16)),
+        const SizedBox(height: 6),
+        Container(
+          width: 32,
+          height: 80 * height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                color.withOpacity(0.8),
+                color,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          day,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.black.withOpacity(0.6),
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
     );
   }
 
-  //mood bar for chart
-  Widget _buildMoodBar(String day, String emoji, double height) {
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(emoji, style: TextStyle(fontSize: 16)),
-          const SizedBox(height: 4),
-          Container(
-            width: 30,
-            height: 55 * height,
-            decoration: BoxDecoration(
-              color: AppColors.darkPink,
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            day,
-            style: TextStyle(
-              fontSize: 9,
-              color: AppColors.textMedium,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //helper: to get month name
-  String _getMonthName(int month) {
+  String _formatDate(DateTime date) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
-    return months[month - 1];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }
 
