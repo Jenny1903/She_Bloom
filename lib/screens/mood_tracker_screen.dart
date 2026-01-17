@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants/colors.dart';
 import 'dart:ui';
+import 'dart:math' as math;
+import '../constants/colors.dart';
 
 class MoodTrackerScreen extends StatefulWidget {
   const MoodTrackerScreen({super.key});
@@ -9,166 +10,136 @@ class MoodTrackerScreen extends StatefulWidget {
   State<MoodTrackerScreen> createState() => _MoodTrackerScreenState();
 }
 
-class _MoodTrackerScreenState extends State<MoodTrackerScreen>
-    with SingleTickerProviderStateMixin {
+class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   DateTime selectedDate = DateTime.now();
   String? selectedMood;
-  String notes = '';
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
+  double intensity = 0.5;
 
-  //mood options with emojis and colors
+  //6 mood options with blob colors and backgrounds
   final List<Map<String, dynamic>> moods = [
     {
       'name': 'Very Pleasant',
-      'emoji': '😊',
-      'gradient': [Color(0xFFFF6B6B), Color(0xFFFFB6B9)],
-      'bgColor': Color(0xFFFFE5E5),
+      'blobColor': Color(0xFFFF8C42), // Orange blob
+      'bgColor': Color(0xFFFFF5E6), // Cream background
+      'face': 'happy',
     },
     {
       'name': 'Pleasant',
-      'emoji': '🙂',
-      'gradient': [Color(0xFFFFA726), Color(0xFFFFD54F)], // Orange/Yellow
-      'bgColor': Color(0xFFFFF3E0),
+      'blobColor': Color(0xFFFFC857), // Yellow blob
+      'bgColor': Color(0xFFFFFBE6), // Light yellow background
+      'face': 'smile',
     },
     {
       'name': 'Neutral',
-      'emoji': '😐',
-      'gradient': [Color(0xFF42A5F5), Color(0xFF90CAF9)], // Blue
-      'bgColor': Color(0xFFE3F2FD),
+      'blobColor': Color(0xFF64B5F6), // Blue blob
+      'bgColor': Color(0xFFE3F2FD), // Light blue background
+      'face': 'neutral',
     },
     {
       'name': 'Unpleasant',
-      'emoji': '😕',
-      'gradient': [Color(0xFF7E57C2), Color(0xFFB39DDB)], // Purple
-      'bgColor': Color(0xFFF3E5F5),
+      'blobColor': Color(0xFF9575CD), // Purple blob
+      'bgColor': Color(0xFFF3E5F5), // Light purple background
+      'face': 'sad',
     },
     {
       'name': 'Very Unpleasant',
-      'emoji': '😢',
-      'gradient': [Color(0xFF5C6BC0), Color(0xFF9FA8DA)], // Indigo
-      'bgColor': Color(0xFFE8EAF6),
+      'blobColor': Color(0xFF7986CB), // Indigo blob
+      'bgColor': Color(0xFFE8EAF6), // Light indigo background
+      'face': 'crying',
     },
     {
       'name': 'Calm',
-      'emoji': '😌',
-      'gradient': [Color(0xFF26A69A), Color(0xFF80CBC4)], // Teal
-      'bgColor': Color(0xFFE0F2F1),
+      'blobColor': Color(0xFF4DD0E1), // Cyan blob
+      'bgColor': Color(0xFFE0F7FA), // Light cyan background
+      'face': 'calm',
     },
   ];
 
-  @override
-  void initState(){
-    super.initState();
-    _animationController = AnimationController(
-        duration: const Duration(milliseconds: 400),
-        vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
-    );
-  }
-
-  @override
-  void disposse(){
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _selectMood(String moodName){
+  void _selectMood(String moodName) {
     setState(() {
-      if (selectedMood == moodName) {
-        selectedMood = null;
-        _animationController.reverse();
-      } else {
-        selectedMood = moodName;
-        _animationController.forward();
-      }
+      selectedMood = moodName;
+      intensity = 0.5;
+    });
+  }
+
+  void _deselectMood() {
+    setState(() {
+      selectedMood = null;
     });
   }
 
   void _saveMood() {
-      if (selectedMood == null) {
-        _showMessage('Please select how you\'re feeling', isError: true);
-        return;
-      }
+    if (selectedMood == null) return;
 
-      // TODO: Save to Firebase
-      _showMessage('Mood logged successfully! ✨', isError: false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Mood logged: $selectedMood at ${(intensity * 100).toInt()}% intensity! ✨'),
+        backgroundColor: Colors.green.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
 
-      setState(() {
-        selectedMood = null;
-        notes = '';
-        _animationController.reverse();
-      });
+    setState(() {
+      selectedMood = null;
+      intensity = 0.5;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (selectedMood != null) {
+      final mood = moods.firstWhere((m) => m['name'] == selectedMood);
+      return _buildFullScreenMood(mood);
     }
 
-    void _showMessage(String message, {required bool isError}){
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message),
-          backgroundColor: isError ? Colors.red.shade400 : Colors.green.shade400,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primaryPink,
+              Color(0xFFE1BEE7),
+              Color(0xFFB2DFDB),
+            ],
           ),
-      );
-    }
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildAppBar(),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 24),
+                      _buildDateCard(),
+                      const SizedBox(height: 32),
+                      _buildMoodBubbles(),
+                      const SizedBox(height: 32),
+                      _buildWeeklyChart(),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
- @override
- Widget build (BuildContext context) {
-   return Scaffold(
-     body: Container(
-       decoration: BoxDecoration(
-         gradient: LinearGradient(
-           begin: Alignment.topLeft,
-           end: Alignment.bottomRight,
-           colors: [
-             Color(0xFFF8BBD0), // Light Pink
-             Color(0xFFE1BEE7), // Light Purple
-             Color(0xFFB2DFDB), // Light Teal
-           ],
-         ),
-       ),
-       child: SafeArea(
-         child: Column(
-           children: [
-             _buildAppBar(),
-             Expanded(
-               child: SingleChildScrollView(
-                 physics: const BouncingScrollPhysics(),
-                 padding: const EdgeInsets.all(20),
-                 child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     _buildHeader(),
-                     const SizedBox(height: 24),
-                     _buildDateCard(),
-                     const SizedBox(height: 32),
-                     _buildMoodBubbles(),
-                     const SizedBox(height: 32),
-                     if (selectedMood != null) ...[
-                       _buildNotesCard(),
-                       const SizedBox(height: 24),
-                       _buildSaveButton(),
-                       const SizedBox(height: 32),
-                     ],
-                     _buildWeeklyChart(),
-                     const SizedBox(height: 20),
-                   ],
-                 ),
-               ),
-             ),
-           ],
-         ),
-       ),
-     ),
-   );
- }
-
- //appBar
- Widget _buildAppBar(){
+  Widget _buildAppBar() {
     return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+      padding: const EdgeInsets.all(16),
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
@@ -190,23 +161,21 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
         ],
       ),
     );
- }
+  }
 
- //header
- Widget _buildHeader(){
+  Widget _buildHeader() {
     return const Text(
-      'How are you\nfeeling today?',
+      'Tell me how you\nfeel today',
       style: TextStyle(
         fontSize: 36,
         fontWeight: FontWeight.bold,
-        color: Colors.black87,
+        color: AppColors.textDark,
         height: 1.2,
       ),
     );
- }
+  }
 
- //date card
-  Widget _buildDateCard(){
+  Widget _buildDateCard() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -234,7 +203,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
                   color: Colors.white.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.calendar_today, color: Colors.black54),
+                child: const Icon(Icons.calendar_today, color: AppColors.textMedium),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -245,7 +214,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
                       'Today',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.black.withOpacity(0.5),
+                        color: AppColors.textMedium,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -254,7 +223,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: AppColors.textDark,
                       ),
                     ),
                   ],
@@ -267,268 +236,264 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
     );
   }
 
-  //mood bubbles with expnad animation
-  Widget _buildMoodBubbles(){
+  Widget _buildMoodBubbles() {
     return Column(
       children: moods.map((mood) {
-        bool isSelected = selectedMood == mood['name'];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildMoodBubble(mood, isSelected),
+          padding: const EdgeInsets.only(bottom: 16),
+          child: _buildCollapsedMoodBubble(mood),
         );
       }).toList(),
     );
   }
 
-  //mood bar for chart
-  Widget _buildMoodBubble(Map<String, dynamic> mood, bool isSelected) {
+  Widget _buildCollapsedMoodBubble(Map<String, dynamic> mood) {
+    final Color bgColor = mood['bgColor'] as Color? ?? AppColors.lightPink;
+    final Color blobColor = mood['blobColor'] as Color? ?? AppColors.coral;
+    final String moodName = mood['name'] as String? ?? 'Unknown';
+    final String faceType = mood['face'] as String? ?? 'neutral';
+
     return GestureDetector(
-      onTap: () => _selectMood(mood['name'] as String),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        height: isSelected ? 160 : 80,
+      onTap: () => _selectMood(moodName),
+      child: Container(
+        height: 90,
         decoration: BoxDecoration(
-          color: mood['bgColor'],
-          borderRadius: BorderRadius.circular(isSelected ? 30 : 40),
+          color: blobColor, // Use blob color as main background
+          borderRadius: BorderRadius.circular(45),
           border: Border.all(
-            color: Colors.white.withOpacity(0.6),
-            width: isSelected ? 2 : 1.5,
+            color: Colors.white,
+            width: 3,
           ),
-          boxShadow: isSelected
-              ? [
+          boxShadow: [
             BoxShadow(
-              color: (mood['gradient'][0] as Color).withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          ]
-              : [],
+          ],
         ),
-        child: Stack(
-          children: [
-            // Gradient overlay when selected
-            if (isSelected)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        (mood['gradient'][0] as Color).withOpacity(0.2),
-                        (mood['gradient'][1] as Color).withOpacity(0.1),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(30),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Row(
+            children: [
+              // Large face circle
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Color(0xFFFF6B6B), // Coral/salmon color for face
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: _buildMediumFace(faceType),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Text(
+                  moodName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-            // Content
+  //full screen mood with blob shape
+  Widget _buildFullScreenMood(Map<String, dynamic> mood) {
+    final Color bgColor = mood['bgColor'] as Color? ?? AppColors.lightPink;
+    final Color blobColor = mood['blobColor'] as Color? ?? AppColors.coral;
+    final String moodName = mood['name'] as String? ?? 'Unknown';
+    final String faceType = mood['face'] as String? ?? 'neutral';
+
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Back button
             Padding(
-              padding: const EdgeInsets.all(20),
-              child: isSelected
-                  ? _buildExpandedMoodContent(mood)
-                  : _buildCollapsedMoodContent(mood),
+              padding: const EdgeInsets.all(16),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, size: 24, color: Colors.black87),
+                  onPressed: _deselectMood,
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.5),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                ),
+              ),
             ),
+
+            // Title
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'Tell me how you feel today',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // Blob with face
+            Expanded(
+              child: Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Blob shape
+                    CustomPaint(
+                      size: const Size(300, 320),
+                      painter: BlobPainter(color: blobColor),
+                    ),
+                    // Face and text on top
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildCartoonFace(faceType),
+                        const SizedBox(height: 80),
+                        Text(
+                          moodName,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Intensity slider
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Very Unpleasant',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                      ),
+                      Text(
+                        'Very Pleasant',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SliderTheme(
+                    data: SliderThemeData(
+                      trackHeight: 12,
+                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
+                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
+                      activeTrackColor: Colors.white.withOpacity(0.8),
+                      inactiveTrackColor: Colors.black.withOpacity(0.15),
+                      thumbColor: Colors.white,
+                    ),
+                    child: Slider(
+                      value: intensity,
+                      onChanged: (value) {
+                        setState(() {
+                          intensity = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Next button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _saveMood,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black87,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  child: const Text(
+                    'Next',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
-
   }
 
-  //collapsed bubble content
-  Widget _buildCollapsedMoodContent(Map<String, dynamic> mood){
-    return Row(
-      children: [
-        //Emoji circle
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: mood['gradient'] as List<Color>,
-            ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: (mood['gradient'][0] as Color).withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              mood['emoji'] as String,
-              style: const TextStyle(fontSize: 28),
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 16),
-        //mood name
-        Expanded(
-          child: Text(
-            mood['name'] as String,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  //expanded bubble content
-  Widget _buildExpandedMoodContent(Map<String, dynamic> mood){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Large emoji
-        Container(
-          width: 70,
-          height: 70,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: mood['gradient'] as List<Color>,
-            ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: (mood['gradient'][0] as Color).withOpacity(0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              mood['emoji'] as String,
-              style: const TextStyle(fontSize: 40),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Mood name
-        Text(
-          mood['name'] as String,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-      ],
-    );
-  }
-
-  //notes card
-  Widget _buildNotesCard() {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.5),
-                  Colors.white.withOpacity(0.3),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.6),
-                width: 1.5,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.edit_note, size: 20, color: Colors.black54),
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'What\'s on your mind?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  maxLines: 3,
-                  onChanged: (value) => notes = value,
-                  style: const TextStyle(color: Colors.black87),
-                  decoration: InputDecoration(
-                    hintText: 'Share your thoughts... (optional)',
-                    hintStyle: TextStyle(color: Colors.black.withOpacity(0.4)),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+  //build cartoon faces
+  Widget _buildCartoonFace(String faceType) {
+    return SizedBox(
+      width: 120,
+      height: 100,
+      child: CustomPaint(
+        painter: FacePainter(faceType: faceType),
       ),
     );
   }
 
-  //save button
-  Widget _buildSaveButton() {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: GestureDetector(
-        onTap: _saveMood,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFE91E63), Color(0xFFF48FB1)],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0xFFE91E63).withOpacity(0.4),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: const Text(
-            'Save Mood',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
+  Widget _buildTinyFace(String faceType) {
+    return SizedBox(
+      width: 30,
+      height: 25,
+      child: CustomPaint(
+        painter: FacePainter(faceType: faceType, scale: 0.25),
       ),
     );
   }
 
-  //weekly mood chart
+  Widget _buildMediumFace(String faceType) {
+    return SizedBox(
+      width: 50,
+      height: 40,
+      child: CustomPaint(
+        painter: FacePainter(faceType: faceType, scale: 0.45),
+      ),
+    );
+  }
+
   Widget _buildWeeklyChart() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -560,7 +525,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: AppColors.textDark,
                     ),
                   ),
                   TextButton(
@@ -568,7 +533,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
                     child: const Text(
                       'See All',
                       style: TextStyle(
-                        color: Color(0xFFE91E63),
+                        color: AppColors.darkPink,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -576,18 +541,17 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
                 ],
               ),
               const SizedBox(height: 20),
-              // Chart bars
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _buildMoodBar('Mon', '😊', 0.8, Color(0xFFFF6B6B)),
-                  _buildMoodBar('Tue', '😌', 0.6, Color(0xFF26A69A)),
-                  _buildMoodBar('Wed', '😐', 0.4, Color(0xFF42A5F5)),
-                  _buildMoodBar('Thu', '😕', 0.7, Color(0xFF7E57C2)),
-                  _buildMoodBar('Fri', '😢', 0.3, Color(0xFF5C6BC0)),
-                  _buildMoodBar('Sat', '🙂', 0.85, Color(0xFFFFA726)),
-                  _buildMoodBar('Sun', '😊', 0.9, Color(0xFFFF6B6B)),
+                  _buildMoodBar('Mon', 0.8, AppColors.coral),
+                  _buildMoodBar('Tue', 0.6, Color(0xFF26A69A)),
+                  _buildMoodBar('Wed', 0.4, Color(0xFF42A5F5)),
+                  _buildMoodBar('Thu', 0.7, Color(0xFF7E57C2)),
+                  _buildMoodBar('Fri', 0.3, Color(0xFF5C6BC0)),
+                  _buildMoodBar('Sat', 0.85, Color(0xFFFFA726)),
+                  _buildMoodBar('Sun', 0.9, AppColors.coral),
                 ],
               ),
               const SizedBox(height: 16),
@@ -596,7 +560,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
                   '🌟 Your mood is getting better!',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.black.withOpacity(0.6),
+                    color: AppColors.textMedium,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -608,13 +572,10 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
     );
   }
 
-  //individual mood bar
-  Widget _buildMoodBar(String day, String emoji, double height, Color color) {
+  Widget _buildMoodBar(String day, double height, Color color) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(emoji, style: const TextStyle(fontSize: 16)),
-        const SizedBox(height: 6),
         Container(
           width: 32,
           height: 80 * height,
@@ -642,7 +603,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
           day,
           style: TextStyle(
             fontSize: 11,
-            color: Colors.black.withOpacity(0.6),
+            color: AppColors.textMedium,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -659,3 +620,119 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
   }
 }
 
+//custom painter for blob shape
+class BlobPainter extends CustomPainter {
+  final Color color;
+
+  BlobPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    final w = size.width;
+    final h = size.height;
+
+    // Organic blob shape with curves
+    path.moveTo(w * 0.5, 0);
+    path.quadraticBezierTo(w * 0.8, h * 0.1, w * 0.9, h * 0.35);
+    path.quadraticBezierTo(w, h * 0.6, w * 0.85, h * 0.8);
+    path.quadraticBezierTo(w * 0.7, h, w * 0.5, h);
+    path.quadraticBezierTo(w * 0.3, h, w * 0.15, h * 0.8);
+    path.quadraticBezierTo(0, h * 0.6, w * 0.1, h * 0.35);
+    path.quadraticBezierTo(w * 0.2, h * 0.1, w * 0.5, 0);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+//custom painter for cartoon faces
+class FacePainter extends CustomPainter {
+  final String faceType;
+  final double scale;
+
+  FacePainter({required this.faceType, this.scale = 1.0});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black87
+      ..style = PaintingStyle.fill;
+
+    final eyePaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final centerX = size.width / 2;
+    final s = scale;
+
+    //draw eyes based on face type
+    if (faceType == 'happy' || faceType == 'smile' || faceType == 'neutral' || faceType == 'calm') {
+      // White of eyes
+      canvas.drawCircle(Offset(centerX - 25 * s, 20 * s), 18 * s, eyePaint);
+      canvas.drawCircle(Offset(centerX + 25 * s, 20 * s), 18 * s, eyePaint);
+      //black pupils
+      canvas.drawCircle(Offset(centerX - 25 * s, 25 * s), 10 * s, paint);
+      canvas.drawCircle(Offset(centerX + 25 * s, 25 * s), 10 * s, paint);
+    } else if (faceType == 'sad' || faceType == 'crying') {
+      // Sad eyes (smaller)
+      canvas.drawCircle(Offset(centerX - 25 * s, 20 * s), 8 * s, paint);
+      canvas.drawCircle(Offset(centerX + 25 * s, 20 * s), 8 * s, paint);
+    }
+
+    //draw mouth
+    final mouthPaint = Paint()
+      ..color = Colors.black87
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5 * s
+      ..strokeCap = StrokeCap.round;
+
+    if (faceType == 'happy') {
+      //big smile
+      final mouthPath = Path();
+      mouthPath.moveTo(centerX - 35 * s, 60 * s);
+      mouthPath.quadraticBezierTo(centerX, 85 * s, centerX + 35 * s, 60 * s);
+      canvas.drawPath(mouthPath, mouthPaint);
+    } else if (faceType == 'smile') {
+      //medium smile
+      final mouthPath = Path();
+      mouthPath.moveTo(centerX - 30 * s, 65 * s);
+      mouthPath.quadraticBezierTo(centerX, 80 * s, centerX + 30 * s, 65 * s);
+      canvas.drawPath(mouthPath, mouthPaint);
+    } else if (faceType == 'neutral') {
+      //straight line
+      canvas.drawLine(Offset(centerX - 25 * s, 70 * s), Offset(centerX + 25 * s, 70 * s), mouthPaint);
+    } else if (faceType == 'sad' || faceType == 'crying') {
+      // Frown
+      final mouthPath = Path();
+      mouthPath.moveTo(centerX - 30 * s, 75 * s);
+      mouthPath.quadraticBezierTo(centerX, 60 * s, centerX + 30 * s, 75 * s);
+      canvas.drawPath(mouthPath, mouthPaint);
+    } else if (faceType == 'calm') {
+      //small smile
+      final mouthPath = Path();
+      mouthPath.moveTo(centerX - 20 * s, 70 * s);
+      mouthPath.quadraticBezierTo(centerX, 78 * s, centerX + 20 * s, 70 * s);
+      canvas.drawPath(mouthPath, mouthPaint);
+    }
+
+    //blush for happy face
+    if (faceType == 'happy') {
+      final blushPaint = Paint()
+        ..color = Colors.pink.withOpacity(0.4)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(centerX - 50 * s, 50 * s), 12 * s, blushPaint);
+      canvas.drawCircle(Offset(centerX + 50 * s, 50 * s), 12 * s, blushPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
