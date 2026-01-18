@@ -237,76 +237,109 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   }
 
   Widget _buildMoodBubbles() {
-    return Column(
-      children: moods.map((mood) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _buildCollapsedMoodBubble(mood),
-        );
-      }).toList(),
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.95,
+      ),
+      itemCount: moods.length,
+      itemBuilder: (context, index) {
+        return _buildCollapsedMoodCard(moods[index]);
+      },
     );
   }
 
-  Widget _buildCollapsedMoodBubble(Map<String, dynamic> mood) {
-    final Color bgColor = mood['bgColor'] as Color? ?? AppColors.lightPink;
+  Widget _buildCollapsedMoodCard(Map<String, dynamic> mood) {
     final Color blobColor = mood['blobColor'] as Color? ?? AppColors.coral;
     final String moodName = mood['name'] as String? ?? 'Unknown';
     final String faceType = mood['face'] as String? ?? 'neutral';
 
     return GestureDetector(
       onTap: () => _selectMood(moodName),
-      child: Container(
-        height: 90,
-        decoration: BoxDecoration(
-          color: blobColor, // Use blob color as main background
-          borderRadius: BorderRadius.circular(45),
-          border: Border.all(
-            color: Colors.white,
-            width: 3,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withOpacity(0.5),
+                  Colors.white.withOpacity(0.3),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.6),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Row(
-            children: [
-              // Large face circle
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Color(0xFFFF6B6B), // Coral/salmon color for face
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: _buildMediumFace(faceType),
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Text(
-                  moodName,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Face circle with gradient
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          blobColor.withOpacity(0.8),
+                          blobColor.withOpacity(0.6),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: blobColor.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: _buildMediumFace(faceType),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  // Mood name
+                  Text(
+                    moodName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  //full screen mood with blob shape
+  //full-screen mood with blob shape
   Widget _buildFullScreenMood(Map<String, dynamic> mood) {
     final Color bgColor = mood['bgColor'] as Color? ?? AppColors.lightPink;
     final Color blobColor = mood['blobColor'] as Color? ?? AppColors.coral;
@@ -318,7 +351,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Back button
+            //back button
             Padding(
               padding: const EdgeInsets.all(16),
               child: Align(
@@ -334,7 +367,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               ),
             ),
 
-            // Title
+            //title
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: Text(
@@ -350,7 +383,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
             const SizedBox(height: 40),
 
-            // Blob with face
+            //blob with face
             Expanded(
               child: Center(
                 child: Stack(
@@ -382,7 +415,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               ),
             ),
 
-            // Intensity slider
+            //intensity slider
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Column(
@@ -430,7 +463,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
             const SizedBox(height: 20),
 
-            // Next button
+            //next button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: SizedBox(
@@ -636,7 +669,7 @@ class BlobPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Organic blob shape with curves
+    //organic blob shape with curves
     path.moveTo(w * 0.5, 0);
     path.quadraticBezierTo(w * 0.8, h * 0.1, w * 0.9, h * 0.35);
     path.quadraticBezierTo(w, h * 0.6, w * 0.85, h * 0.8);
@@ -678,7 +711,7 @@ class FacePainter extends CustomPainter {
       // White of eyes
       canvas.drawCircle(Offset(centerX - 25 * s, 20 * s), 18 * s, eyePaint);
       canvas.drawCircle(Offset(centerX + 25 * s, 20 * s), 18 * s, eyePaint);
-      //black pupils
+      // Black pupils
       canvas.drawCircle(Offset(centerX - 25 * s, 25 * s), 10 * s, paint);
       canvas.drawCircle(Offset(centerX + 25 * s, 25 * s), 10 * s, paint);
     } else if (faceType == 'sad' || faceType == 'crying') {
@@ -695,27 +728,32 @@ class FacePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     if (faceType == 'happy') {
+
       //big smile
       final mouthPath = Path();
       mouthPath.moveTo(centerX - 35 * s, 60 * s);
       mouthPath.quadraticBezierTo(centerX, 85 * s, centerX + 35 * s, 60 * s);
       canvas.drawPath(mouthPath, mouthPaint);
     } else if (faceType == 'smile') {
+
       //medium smile
       final mouthPath = Path();
       mouthPath.moveTo(centerX - 30 * s, 65 * s);
       mouthPath.quadraticBezierTo(centerX, 80 * s, centerX + 30 * s, 65 * s);
       canvas.drawPath(mouthPath, mouthPaint);
     } else if (faceType == 'neutral') {
+
       //straight line
       canvas.drawLine(Offset(centerX - 25 * s, 70 * s), Offset(centerX + 25 * s, 70 * s), mouthPaint);
     } else if (faceType == 'sad' || faceType == 'crying') {
+
       // Frown
       final mouthPath = Path();
       mouthPath.moveTo(centerX - 30 * s, 75 * s);
       mouthPath.quadraticBezierTo(centerX, 60 * s, centerX + 30 * s, 75 * s);
       canvas.drawPath(mouthPath, mouthPaint);
     } else if (faceType == 'calm') {
+
       //small smile
       final mouthPath = Path();
       mouthPath.moveTo(centerX - 20 * s, 70 * s);
