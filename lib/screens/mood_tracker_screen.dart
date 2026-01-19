@@ -2,42 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:math' as math;
 import '../constants/colors.dart';
-import 'package:she_bloom/widgets/blob_painter.dart';
 
 class MoodTrackerScreen extends StatefulWidget {
   const MoodTrackerScreen({super.key});
 
   @override
   State<MoodTrackerScreen> createState() => _MoodTrackerScreenState();
-}
-
-class MoodBlobClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-
-    path.moveTo(0, size.height * 0.25);
-
-    path.cubicTo(
-      size.width * 0.2, 0,
-      size.width * 0.8, 0,
-      size.width, size.height * 0.25,
-    );
-
-    path.lineTo(size.width, size.height * 0.85);
-
-    path.cubicTo(
-      size.width * 0.8, size.height,
-      size.width * 0.2, size.height,
-      0, size.height * 0.85,
-    );
-
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
@@ -322,7 +292,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Face circle with gradient
+                  //cace circle with gradient
                   Container(
                     width: 80,
                     height: 80,
@@ -369,9 +339,8 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     );
   }
 
-  //full-screen mood with blob shape
+  //full screen mood with blob shape
   Widget _buildFullScreenMood(Map<String, dynamic> mood) {
-
     final Color bgColor = mood['bgColor'] as Color? ?? AppColors.lightPink;
     final Color blobColor = mood['blobColor'] as Color? ?? AppColors.coral;
     final String moodName = mood['name'] as String? ?? 'Unknown';
@@ -379,8 +348,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      body:
-      SafeArea(
+      body: SafeArea(
         child: Column(
           children: [
             //back button
@@ -417,43 +385,35 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
             //blob with face
             Expanded(
-              child: Stack(
-                  alignment: Alignment.bottomCenter,
+              child: Center(
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: MediaQuery.of(context).size.height * 0.65,
-                      child: ClipPath(
-                        clipper: MoodBlobClipper(),
-                        child: Container(
-                          color: blobColor,
-                        ),
-                      ),
+                    // Blob shape - made taller
+                    CustomPaint(
+                      size: const Size(260, 480), // Taller pill shape!
+                      painter: BlobPainter(color: blobColor),
                     ),
-
                     // Face and text on top
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 100.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildCartoonFace(faceType),
-                          const SizedBox(height: 40),
-                          Text(
-                            moodName,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 60), // Push down from top
+                        _buildCartoonFace(faceType),
+                        const SizedBox(height: 120),
+                        Text(
+                          moodName,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
+              ),
             ),
 
             //intensity slider
@@ -694,7 +654,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   }
 }
 
-//custom painter for blob shape
+//custom painter for blob shape using Bezier curves
 class BlobPainter extends CustomPainter {
   final Color color;
 
@@ -710,14 +670,43 @@ class BlobPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    //organic blob shape with curves
+    //smooth pill/capsule shape with organic curves
     path.moveTo(w * 0.5, 0);
-    path.quadraticBezierTo(w * 0.8, h * 0.1, w * 0.9, h * 0.35);
-    path.quadraticBezierTo(w, h * 0.6, w * 0.85, h * 0.8);
-    path.quadraticBezierTo(w * 0.7, h, w * 0.5, h);
-    path.quadraticBezierTo(w * 0.3, h, w * 0.15, h * 0.8);
-    path.quadraticBezierTo(0, h * 0.6, w * 0.1, h * 0.35);
-    path.quadraticBezierTo(w * 0.2, h * 0.1, w * 0.5, 0);
+
+    //top right curve
+    path.cubicTo(
+      w * 0.75, 0,           // Control point 1
+      w, h * 0.15,          // Control point 2
+      w, h * 0.35,          // End point
+    );
+
+    //right side straight-ish section
+    path.lineTo(w, h * 0.65);
+
+    //bottom right curve
+    path.cubicTo(
+      w, h * 0.85,          // Control point 1
+      w * 0.75, h,          // Control point 2
+      w * 0.5, h,           // End point
+    );
+
+    //bottom left curve
+    path.cubicTo(
+      w * 0.25, h,          // Control point 1
+      0, h * 0.85,          // Control point 2
+      0, h * 0.65,          // End point
+    );
+
+    //left side straight-ish section
+    path.lineTo(0, h * 0.35);
+
+    //top left curve
+    path.cubicTo(
+      0, h * 0.15,          // Control point 1
+      w * 0.25, 0,          // Control point 2
+      w * 0.5, 0,           // End point
+    );
+
     path.close();
 
     canvas.drawPath(path, paint);
@@ -769,32 +758,27 @@ class FacePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     if (faceType == 'happy') {
-
       //big smile
       final mouthPath = Path();
       mouthPath.moveTo(centerX - 35 * s, 60 * s);
       mouthPath.quadraticBezierTo(centerX, 85 * s, centerX + 35 * s, 60 * s);
       canvas.drawPath(mouthPath, mouthPaint);
     } else if (faceType == 'smile') {
-
       //medium smile
       final mouthPath = Path();
       mouthPath.moveTo(centerX - 30 * s, 65 * s);
       mouthPath.quadraticBezierTo(centerX, 80 * s, centerX + 30 * s, 65 * s);
       canvas.drawPath(mouthPath, mouthPaint);
     } else if (faceType == 'neutral') {
-
       //straight line
       canvas.drawLine(Offset(centerX - 25 * s, 70 * s), Offset(centerX + 25 * s, 70 * s), mouthPaint);
     } else if (faceType == 'sad' || faceType == 'crying') {
-
-      // Frown
+      //frown
       final mouthPath = Path();
       mouthPath.moveTo(centerX - 30 * s, 75 * s);
       mouthPath.quadraticBezierTo(centerX, 60 * s, centerX + 30 * s, 75 * s);
       canvas.drawPath(mouthPath, mouthPaint);
     } else if (faceType == 'calm') {
-
       //small smile
       final mouthPath = Path();
       mouthPath.moveTo(centerX - 20 * s, 70 * s);
