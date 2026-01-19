@@ -2,12 +2,42 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:math' as math;
 import '../constants/colors.dart';
+import 'package:she_bloom/widgets/blob_painter.dart';
 
 class MoodTrackerScreen extends StatefulWidget {
   const MoodTrackerScreen({super.key});
 
   @override
   State<MoodTrackerScreen> createState() => _MoodTrackerScreenState();
+}
+
+class MoodBlobClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+
+    path.moveTo(0, size.height * 0.25);
+
+    path.cubicTo(
+      size.width * 0.2, 0,
+      size.width * 0.8, 0,
+      size.width, size.height * 0.25,
+    );
+
+    path.lineTo(size.width, size.height * 0.85);
+
+    path.cubicTo(
+      size.width * 0.8, size.height,
+      size.width * 0.2, size.height,
+      0, size.height * 0.85,
+    );
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
@@ -341,6 +371,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
   //full-screen mood with blob shape
   Widget _buildFullScreenMood(Map<String, dynamic> mood) {
+
     final Color bgColor = mood['bgColor'] as Color? ?? AppColors.lightPink;
     final Color blobColor = mood['blobColor'] as Color? ?? AppColors.coral;
     final String moodName = mood['name'] as String? ?? 'Unknown';
@@ -348,7 +379,8 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
     return Scaffold(
       backgroundColor: bgColor,
-      body: SafeArea(
+      body:
+      SafeArea(
         child: Column(
           children: [
             //back button
@@ -385,34 +417,43 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
             //blob with face
             Expanded(
-              child: Center(
-                child: Stack(
-                  alignment: Alignment.center,
+              child: Stack(
+                  alignment: Alignment.bottomCenter,
                   children: [
-                    // Blob shape
-                    CustomPaint(
-                      size: const Size(300, 320),
-                      painter: BlobPainter(color: blobColor),
-                    ),
-                    // Face and text on top
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildCartoonFace(faceType),
-                        const SizedBox(height: 80),
-                        Text(
-                          moodName,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: MediaQuery.of(context).size.height * 0.65,
+                      child: ClipPath(
+                        clipper: MoodBlobClipper(),
+                        child: Container(
+                          color: blobColor,
                         ),
-                      ],
+                      ),
+                    ),
+
+                    // Face and text on top
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 100.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildCartoonFace(faceType),
+                          const SizedBox(height: 40),
+                          Text(
+                            moodName,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
             ),
 
             //intensity slider
