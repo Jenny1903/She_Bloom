@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'dart:math' as math;
 import '../constants/colors.dart';
 
 class MoodTrackerScreen extends StatefulWidget {
@@ -15,7 +14,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   String? selectedMood;
   double intensity = 0.5;
 
-  //6 mood options with blob colors and backgrounds
+  // 🎨 6 Mood options with blob colors and backgrounds
   final List<Map<String, dynamic>> moods = [
     {
       'name': 'Very Pleasant',
@@ -291,11 +290,12 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  //cace circle with gradient
+                  //face circle with gradient
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 70,
+                    height: 70,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -318,17 +318,18 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                       child: _buildMediumFace(faceType),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   // Mood name
                   Text(
                     moodName,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textDark,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -339,7 +340,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     );
   }
 
-  //full screen mood with blob shape
+  //full-screen mood with blob shape
   Widget _buildFullScreenMood(Map<String, dynamic> mood) {
     final Color bgColor = mood['bgColor'] as Color? ?? AppColors.lightPink;
     final Color blobColor = mood['blobColor'] as Color? ?? AppColors.coral;
@@ -349,148 +350,151 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
-        child: Column(
+        bottom: false, // Allow blob to extend to bottom
+        child: Stack(
           children: [
-            //back button
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios, size: 24, color: Colors.black87),
-                  onPressed: _deselectMood,
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.5),
-                    padding: const EdgeInsets.all(12),
+            //fullScreen blob background
+            Positioned(
+              top: 100,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: CustomPaint(
+                painter: BlobPainter(color: blobColor),
+              ),
+            ),
+
+            //content on top of blob
+            Column(
+              children: [
+                //back button
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, size: 24, color: Colors.black87),
+                      onPressed: _deselectMood,
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.5),
+                        padding: const EdgeInsets.all(12),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
 
-            //title
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                'Tell me how you feel today',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            //blob with face
-            Expanded(
-              child: Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Blob shape - made taller
-                    CustomPaint(
-                      size: const Size(260, 480), // Taller pill shape!
-                      painter: BlobPainter(color: blobColor),
+                //title
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    'Tell me how you feel today',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
                     ),
-                    // Face and text on top
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 60), // Push down from top
-                        _buildCartoonFace(faceType),
-                        const SizedBox(height: 120),
-                        Text(
-                          moodName,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-            ),
 
-            //intensity slider
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const Spacer(),
+
+                //face in the middle
+                _buildCartoonFace(faceType),
+
+                const SizedBox(height: 24),
+
+                //mood name
+                Text(
+                  moodName,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+
+                const Spacer(),
+
+                //intensity slider (inside blob)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Column(
                     children: [
-                      Text(
-                        'Very Unpleasant',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.black.withOpacity(0.5),
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Very Unpleasant',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white.withOpacity(0.8),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            'Very Pleasant',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white.withOpacity(0.8),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        'Very Pleasant',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.black.withOpacity(0.5),
+                      SliderTheme(
+                        data: SliderThemeData(
+                          trackHeight: 8,
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 16),
+                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
+                          activeTrackColor: Colors.white.withOpacity(0.9),
+                          inactiveTrackColor: Colors.black.withOpacity(0.15),
+                          thumbColor: Colors.white,
+                        ),
+                        child: Slider(
+                          value: intensity,
+                          onChanged: (value) {
+                            setState(() {
+                              intensity = value;
+                            });
+                          },
                         ),
                       ),
                     ],
                   ),
-                  SliderTheme(
-                    data: SliderThemeData(
-                      trackHeight: 12,
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
-                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
-                      activeTrackColor: Colors.white.withOpacity(0.8),
-                      inactiveTrackColor: Colors.black.withOpacity(0.15),
-                      thumbColor: Colors.white,
-                    ),
-                    child: Slider(
-                      value: intensity,
-                      onChanged: (value) {
-                        setState(() {
-                          intensity = value;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
 
-            const SizedBox(height: 20),
+                const SizedBox(height: 32),
 
-            //next button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _saveMood,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black87,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                  ),
-                  child: const Text(
-                    'Next',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                //next button (inside blob)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _saveMood,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black87,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                      ),
+                      child: const Text(
+                        'Next',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 40),
+                const SizedBox(height: 40),
+              ],
+            ),
           ],
         ),
       ),
@@ -670,42 +674,30 @@ class BlobPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    //smooth pill/capsule shape with organic curves
-    path.moveTo(w * 0.5, 0);
+    //start from top-left
+    path.moveTo(0, h * 0.25);
 
-    //top right curve
+    //top curve - smooth wave at the top
     path.cubicTo(
-      w * 0.75, 0,           // Control point 1
-      w, h * 0.15,          // Control point 2
-      w, h * 0.35,          // End point
+      w * 0.15, h * 0.18,    // Control point 1
+      w * 0.35, h * 0.15,    // Control point 2
+      w * 0.5, h * 0.15,     // Peak
     );
 
-    //right side straight-ish section
-    path.lineTo(w, h * 0.65);
-
-    //bottom right curve
     path.cubicTo(
-      w, h * 0.85,          // Control point 1
-      w * 0.75, h,          // Control point 2
-      w * 0.5, h,           // End point
+      w * 0.65, h * 0.15,    // Control point 1
+      w * 0.85, h * 0.18,    // Control point 2
+      w, h * 0.25,           // Top-right
     );
 
-    //bottom left curve
-    path.cubicTo(
-      w * 0.25, h,          // Control point 1
-      0, h * 0.85,          // Control point 2
-      0, h * 0.65,          // End point
-    );
+    //right side ~ straight down to bottom
+    path.lineTo(w, h);
 
-    //left side straight-ish section
-    path.lineTo(0, h * 0.35);
+    //bottom ~ straight across
+    path.lineTo(0, h);
 
-    //top left curve
-    path.cubicTo(
-      0, h * 0.15,          // Control point 1
-      w * 0.25, 0,          // Control point 2
-      w * 0.5, 0,           // End point
-    );
+    //left side ~ back to start
+    path.lineTo(0, h * 0.25);
 
     path.close();
 
@@ -738,14 +730,14 @@ class FacePainter extends CustomPainter {
 
     //draw eyes based on face type
     if (faceType == 'happy' || faceType == 'smile' || faceType == 'neutral' || faceType == 'calm') {
-      // White of eyes
+      //white of eyes
       canvas.drawCircle(Offset(centerX - 25 * s, 20 * s), 18 * s, eyePaint);
       canvas.drawCircle(Offset(centerX + 25 * s, 20 * s), 18 * s, eyePaint);
-      // Black pupils
+      //black pupils
       canvas.drawCircle(Offset(centerX - 25 * s, 25 * s), 10 * s, paint);
       canvas.drawCircle(Offset(centerX + 25 * s, 25 * s), 10 * s, paint);
     } else if (faceType == 'sad' || faceType == 'crying') {
-      // Sad eyes (smaller)
+      //sad eyes (smaller)
       canvas.drawCircle(Offset(centerX - 25 * s, 20 * s), 8 * s, paint);
       canvas.drawCircle(Offset(centerX + 25 * s, 20 * s), 8 * s, paint);
     }
