@@ -25,7 +25,7 @@ class _MoodCarouselCardState extends State<MoodCarouselCard> {
   int _currentIndex = 0;
   Timer? _timer;
 
-  // List of mood emojis
+  //list of mood emojis
   final List<String> _images = [
     'assets/images/happy.jpg',
     'assets/images/calm.jpg',
@@ -107,7 +107,7 @@ class _MoodCarouselCardState extends State<MoodCarouselCard> {
                 ),
               ),
 
-              // Gradient overlay for better text visibility
+              //gradient overlay for better text visibility
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -123,7 +123,7 @@ class _MoodCarouselCardState extends State<MoodCarouselCard> {
                 ),
               ),
 
-              // Title on top
+              //title on top
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Align(
