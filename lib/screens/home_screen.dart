@@ -292,6 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: CategoryCard(
             title: 'Symptom\nLogger',
+            imagePath: 'assets/images/symp.jpg',
             icon: Icons.healing,
             backgroundColor: AppColors.coral,
             onTap: () {

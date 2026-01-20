@@ -14,7 +14,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   String? selectedMood;
   double intensity = 0.5;
 
-  // 🎨 6 Mood options with blob colors and backgrounds
+  //6 mood options with blob colors and backgrounds
   final List<Map<String, dynamic>> moods = [
     {
       'name': 'Very Pleasant',

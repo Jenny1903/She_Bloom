@@ -51,6 +51,16 @@ flutter:
     - assets/images/nutrition.png
     - assets/images/workoutYoga.jpg
     - assets/images/healthyChoices.jpg
+    - assets/images/symptom.jpg
+    - assets/images/symp.jpg
+    - assets/images/happy.jpg
+    - assets/images/sad.jpg
+    - assets/images/calm.jpg
+    - assets/images/okay.jpg
+    - assets/images/angry.jpg
+    - assets/images/tired.jpg
+    - assets/images/anxious.jpg
+    - assets/images/crying.jpg
 
 
   fonts:

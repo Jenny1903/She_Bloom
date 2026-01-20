@@ -13,7 +13,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
   Set<String> selectedSymptoms = {};
   String notes = '';
 
-  // 🎨 Symptoms with beautiful gradient colors
+  //symptoms with beautiful gradient colors
   final List<Map<String, dynamic>> symptoms = [
     {
       'name': 'Cramps',
@@ -84,7 +84,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
     // TODO: Save to Firebase
     _showMessage('${selectedSymptoms.length} symptoms logged! ✨', isError: false);
 
-    // Clear selection
+    //clear selection
     setState(() {
       selectedSymptoms.clear();
       notes = '';
@@ -149,7 +149,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
     );
   }
 
-  // 🎯 App bar
+  //app bar
   Widget _buildAppBar() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -177,7 +177,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
     );
   }
 
-  // 📝 Header
+  //header
   Widget _buildHeader() {
     return const Text(
       'How are you\nfeeling today?',
@@ -190,7 +190,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
     );
   }
 
-  // 📅 Date card
+  //date card
   Widget _buildDateCard() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -270,7 +270,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
     );
   }
 
-  // 🎨 Symptom grid
+  //symptom grid
   Widget _buildSymptomGrid() {
     return Wrap(
       spacing: 12,
@@ -345,7 +345,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
     );
   }
 
-  // 📝 Notes card
+  //notes card
   Widget _buildNotesCard() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -409,7 +409,7 @@ class _SymptomLoggerScreenState extends State<SymptomLoggerScreen> {
     );
   }
 
-  // 💾 Save button
+  //save button
   Widget _buildSaveButton() {
     return GestureDetector(
       onTap: _saveSymptoms,

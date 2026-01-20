@@ -7,12 +7,14 @@ class MoodCarouselCard extends StatefulWidget {
   final VoidCallback onTap;
   final double? height;
 
+
   const MoodCarouselCard({
     Key? key,
     required this.title,
     required this.backgroundColor,
     required this.onTap,
     this.height,
+
   }) : super(key: key);
 
   @override
@@ -24,17 +26,16 @@ class _MoodCarouselCardState extends State<MoodCarouselCard> {
   Timer? _timer;
 
   // List of mood emojis
-  final List<String> _emojis = [
-    '🥰', // Happy
-    '😌', // Calm
-    '😊', // Okay
-    '😔', // Sad
-    '😢', // Crying
-    '😡', // Angry
-    '😰', // Anxious
-    '😴', // Tired
+  final List<String> _images = [
+    'assets/images/happy.jpg',
+    'assets/images/calm.jpg',
+    'assets/images/okay.jpg',
+    'assets/images/sad.jpg',
+    'assets/images/crying.jpg',
+    'assets/images/angry.jpg',
+    'assets/images/anxious.jpg',
+    'assets/images/tired.jpg',
   ];
-
   @override
   void initState() {
     super.initState();
@@ -45,7 +46,7 @@ class _MoodCarouselCardState extends State<MoodCarouselCard> {
     _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
       if (mounted) {
         setState(() {
-          _currentIndex = (_currentIndex + 1) % _emojis.length;
+          _currentIndex = (_currentIndex + 1) % _images.length;
         });
       }
     });
@@ -74,41 +75,72 @@ class _MoodCarouselCardState extends State<MoodCarouselCard> {
             ),
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
             children: [
-              // Title
-              Text(
-                widget.title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-
-              //emoji Carousel
-              Center(
+              // Background image - fills entire container
+              Positioned.fill(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 500),
                   transitionBuilder: (Widget child, Animation<double> animation) {
-                    // Fade + Scale transition
                     return FadeTransition(
                       opacity: animation,
-                      child: ScaleTransition(
-                        scale: animation,
-                        child: child,
-                      ),
+                      child: child,
                     );
                   },
-                  child: Text(
-                    _emojis[_currentIndex],
+                  child: Image.asset(
+                    _images[_currentIndex],
                     key: ValueKey<int>(_currentIndex),
+                    fit: BoxFit.cover, // COVER fills entire space!
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: widget.backgroundColor.withOpacity(0.3),
+                        child: Icon(
+                          Icons.mood,
+                          size: 60,
+                          color: Colors.white.withOpacity(0.5),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+              // Gradient overlay for better text visibility
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.3),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Title on top
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    widget.title,
                     style: const TextStyle(
-                      fontSize: 48,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black45,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
                     ),
                   ),
                 ),
