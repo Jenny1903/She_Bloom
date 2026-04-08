@@ -201,11 +201,11 @@ Create `firebase_options.dart` using FlutterFire CLI (auto-generated)
 - [x] Period cycle tracker with calendar
 - [x] Symptom logger
 - [x] Mood tracker Health reminders/notifications
-- [ ] Data visualization (charts/graphs)
+- [x] Data visualization (charts/graphs)
 
 ### Phase 3: Backend Migration (Planned)
 - [ ] Node.js + Express.js API
-- [ ] MongoDB integration
+- [x] Firebase integration
 - [ ] RESTful endpoints
 - [ ] JWT authentication
 - [ ] API documentation (Swagger)
