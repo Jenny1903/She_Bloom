@@ -8,7 +8,7 @@ class MoodService {
   // Get current user ID
   String? get userId => _auth.currentUser?.uid;
 
-  //SAVE MOOD
+  // SAVE MOOD ENTRY
   Future<bool> saveMood({
     required String moodName,
     required double intensity,
@@ -18,11 +18,12 @@ class MoodService {
     try {
       if (userId == null) return false;
 
-      final moodDate = date ?? DateTime.now();
-      final normalizedDate = DateTime(moodDate.year, moodDate.month, moodDate.day);
+      // Use provided date or current date
+      DateTime moodDate = date ?? DateTime.now();
+      DateTime normalizedDate = DateTime(moodDate.year, moodDate.month, moodDate.day);
 
-      //Create unique ID using date
-      String moodId = _dateToString(normalizedDate);
+      // Create unique ID for the mood entry
+      String moodId = '${normalizedDate.millisecondsSinceEpoch}';
 
       await _firestore
           .collection('users')
@@ -37,10 +38,10 @@ class MoodService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print('Mood saved: $moodName at ${(intensity * 100).toInt()}%');
+      print('✅ Mood saved: $moodName with intensity ${(intensity * 100).toInt()}%');
       return true;
     } catch (e) {
-      print('Error saving mood: $e');
+      print('❌ Error saving mood: $e');
       return false;
     }
   }
@@ -50,8 +51,8 @@ class MoodService {
     try {
       if (userId == null) return null;
 
-      final normalizedDate = DateTime(date.year, date.month, date.day);
-      String moodId = _dateToString(normalizedDate);
+      DateTime normalizedDate = DateTime(date.year, date.month, date.day);
+      String moodId = '${normalizedDate.millisecondsSinceEpoch}';
 
       DocumentSnapshot doc = await _firestore
           .collection('users')
@@ -60,20 +61,63 @@ class MoodService {
           .doc(moodId)
           .get();
 
-      if (doc.exists) {
-        return doc.data() as Map<String, dynamic>?;
+      if (doc.exists && doc.data() != null) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return {
+          'moodName': data['moodName'],
+          'intensity': data['intensity'],
+          'notes': data['notes'] ?? '',
+          'date': (data['date'] as Timestamp).toDate(),
+        };
       }
       return null;
     } catch (e) {
-      print('Error getting mood: $e');
+      print('❌ Error getting mood for date: $e');
       return null;
     }
   }
 
-  //GET MOODS FOR SPECIFIC MONTH
-  Future<Map<String, Map<String, dynamic>>> getMoodsForMonth(DateTime month) async {
+  // GET MOOD HISTORY (last N days)
+  Future<List<Map<String, dynamic>>> getMoodHistory({int days = 30}) async {
     try {
-      if (userId == null) return {};
+      if (userId == null) return [];
+
+      DateTime startDate = DateTime.now().subtract(Duration(days: days));
+
+      QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('moods')
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .orderBy('date', descending: true)
+          .get();
+
+      List<Map<String, dynamic>> history = [];
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        history.add({
+          'id': doc.id,
+          'moodName': data['moodName'],
+          'intensity': data['intensity'],
+          'notes': data['notes'] ?? '',
+          'date': (data['date'] as Timestamp).toDate(),
+        });
+      }
+
+      print('✅ Loaded ${history.length} mood entries');
+      return history;
+    } catch (e) {
+      print('❌ Error loading mood history: $e');
+      return [];
+    }
+  }
+
+  // GET MOOD STATISTICS (for a specific month)
+  Future<Map<String, dynamic>> getMoodStats(DateTime month) async {
+    try {
+      if (userId == null) {
+        return {'error': 'User not logged in'};
+      }
 
       DateTime startOfMonth = DateTime(month.year, month.month, 1);
       DateTime endOfMonth = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
@@ -86,127 +130,59 @@ class MoodService {
           .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth))
           .get();
 
-      Map<String, Map<String, dynamic>> moods = {};
-
-      for (var doc in snapshot.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        Timestamp timestamp = data['date'] as Timestamp;
-        DateTime date = timestamp.toDate();
-        String dateKey = _dateToString(date);
-
-        moods[dateKey] = {
-          'moodName': data['moodName'],
-          'intensity': data['intensity'],
-          'notes': data['notes'],
-          'date': date,
-        };
-      }
-
-      print('Loaded ${moods.length} moods for ${month.month}/${month.year}');
-      return moods;
-    } catch (e) {
-      print('Error loading monthly moods: $e');
-      return {};
-    }
-  }
-
-  //GET MOOD HISTORY (Last N days)
-  Future<List<Map<String, dynamic>>> getMoodHistory({int days = 30}) async {
-    try {
-      if (userId == null) return [];
-
-      DateTime startDate = DateTime.now().subtract(Duration(days: days));
-      DateTime normalizedStart = DateTime(startDate.year, startDate.month, startDate.day);
-
-      QuerySnapshot snapshot = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('moods')
-          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(normalizedStart))
-          .orderBy('date', descending: true)
-          .get();
-
-      List<Map<String, dynamic>> history = [];
-
-      for (var doc in snapshot.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        Timestamp timestamp = data['date'] as Timestamp;
-
-        history.add({
-          'id': doc.id,
-          'moodName': data['moodName'],
-          'intensity': data['intensity'],
-          'notes': data['notes'],
-          'date': timestamp.toDate(),
-        });
-      }
-
-      print('Loaded ${history.length} moods from last $days days');
-      return history;
-    } catch (e) {
-      print('Error loading mood history: $e');
-      return [];
-    }
-  }
-
-  //GET MOOD STATISTICS
-  Future<Map<String, dynamic>> getMoodStatistics({int days = 7}) async {
-    try {
-      List<Map<String, dynamic>> history = await getMoodHistory(days: days);
-
-      if (history.isEmpty) {
+      if (snapshot.docs.isEmpty) {
         return {
           'totalEntries': 0,
           'averageIntensity': 0.0,
-          'mostCommonMood': null,
-          'moodCounts': {},
+          'mostCommonMood': 'No data',
         };
       }
 
-      //Calculate statistics
+      // Calculate stats
+      int totalEntries = snapshot.docs.length;
       double totalIntensity = 0;
       Map<String, int> moodCounts = {};
 
-      for (var entry in history) {
-        totalIntensity += (entry['intensity'] as double);
-        String mood = entry['moodName'] as String;
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+        totalIntensity += data['intensity'] as double;
+
+        String mood = data['moodName'] as String;
         moodCounts[mood] = (moodCounts[mood] ?? 0) + 1;
       }
 
-      //Find most common mood
-      String? mostCommon;
+      double averageIntensity = totalIntensity / totalEntries;
+
+      // Find most common mood
+      String mostCommonMood = 'Neutral';
       int maxCount = 0;
       moodCounts.forEach((mood, count) {
         if (count > maxCount) {
           maxCount = count;
-          mostCommon = mood;
+          mostCommonMood = mood;
         }
       });
 
       return {
-        'totalEntries': history.length,
-        'averageIntensity': totalIntensity / history.length,
-        'mostCommonMood': mostCommon,
-        'moodCounts': moodCounts,
+        'totalEntries': totalEntries,
+        'averageIntensity': averageIntensity,
+        'mostCommonMood': mostCommonMood,
+        'moodBreakdown': moodCounts,
       };
     } catch (e) {
-      print('Error calculating statistics: $e');
-      return {
-        'totalEntries': 0,
-        'averageIntensity': 0.0,
-        'mostCommonMood': null,
-        'moodCounts': {},
-      };
+      print('❌ Error calculating mood stats: $e');
+      return {'error': e.toString()};
     }
   }
 
-  // 🗑️ DELETE MOOD
+  // DELETE MOOD ENTRY
   Future<bool> deleteMood(DateTime date) async {
     try {
       if (userId == null) return false;
 
-      final normalizedDate = DateTime(date.year, date.month, date.day);
-      String moodId = _dateToString(normalizedDate);
+      DateTime normalizedDate = DateTime(date.year, date.month, date.day);
+      String moodId = '${normalizedDate.millisecondsSinceEpoch}';
 
       await _firestore
           .collection('users')
@@ -215,15 +191,45 @@ class MoodService {
           .doc(moodId)
           .delete();
 
-      print('Mood deleted for $moodId');
+      print('✅ Mood deleted for date: $date');
       return true;
     } catch (e) {
-      print('Error deleting mood: $e');
+      print('❌ Error deleting mood: $e');
       return false;
     }
   }
 
-  //UPDATE MOOD
+  // GET WEEKLY MOOD DATA (for chart)
+  Future<List<Map<String, dynamic>>> getWeeklyMoodData() async {
+    try {
+      if (userId == null) return [];
+
+      // Get last 7 days
+      DateTime today = DateTime.now();
+      List<Map<String, dynamic>> weeklyData = [];
+
+      for (int i = 6; i >= 0; i--) {
+        DateTime day = today.subtract(Duration(days: i));
+        DateTime normalizedDay = DateTime(day.year, day.month, day.day);
+
+        Map<String, dynamic>? moodData = await getMoodForDate(normalizedDay);
+
+        weeklyData.add({
+          'date': normalizedDay,
+          'dayName': _getDayName(normalizedDay.weekday),
+          'moodName': moodData?['moodName'] ?? 'No data',
+          'intensity': moodData?['intensity'] ?? 0.0,
+        });
+      }
+
+      return weeklyData;
+    } catch (e) {
+      print('❌ Error getting weekly mood data: $e');
+      return [];
+    }
+  }
+
+  // UPDATE MOOD ENTRY
   Future<bool> updateMood({
     required DateTime date,
     String? moodName,
@@ -233,14 +239,15 @@ class MoodService {
     try {
       if (userId == null) return false;
 
-      final normalizedDate = DateTime(date.year, date.month, date.day);
-      String moodId = _dateToString(normalizedDate);
+      DateTime normalizedDate = DateTime(date.year, date.month, date.day);
+      String moodId = '${normalizedDate.millisecondsSinceEpoch}';
 
       Map<String, dynamic> updates = {};
       if (moodName != null) updates['moodName'] = moodName;
       if (intensity != null) updates['intensity'] = intensity;
       if (notes != null) updates['notes'] = notes;
-      updates['updatedAt'] = FieldValue.serverTimestamp();
+
+      if (updates.isEmpty) return false;
 
       await _firestore
           .collection('users')
@@ -249,16 +256,17 @@ class MoodService {
           .doc(moodId)
           .update(updates);
 
-      print('Mood updated for $moodId');
+      print('✅ Mood updated successfully');
       return true;
     } catch (e) {
-      print('Error updating mood: $e');
+      print('❌ Error updating mood: $e');
       return false;
     }
   }
 
-  //Convert date to string key
-  String _dateToString(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  // Helper: Get day name from weekday number
+  String _getDayName(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[weekday - 1];
   }
 }
