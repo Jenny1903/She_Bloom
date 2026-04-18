@@ -5,10 +5,10 @@ class MoodService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Get current user ID
+  //Get current user ID
   String? get userId => _auth.currentUser?.uid;
 
-  // SAVE MOOD ENTRY
+  //SAVE MOOD ENTRY
   Future<bool> saveMood({
     required String moodName,
     required double intensity,
@@ -18,11 +18,11 @@ class MoodService {
     try {
       if (userId == null) return false;
 
-      // Use provided date or current date
+      //Use provided date or current date
       DateTime moodDate = date ?? DateTime.now();
       DateTime normalizedDate = DateTime(moodDate.year, moodDate.month, moodDate.day);
 
-      // Create unique ID for the mood entry
+      //Create unique ID for the mood entry
       String moodId = '${normalizedDate.millisecondsSinceEpoch}';
 
       await _firestore
@@ -38,10 +38,10 @@ class MoodService {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print('✅ Mood saved: $moodName with intensity ${(intensity * 100).toInt()}%');
+      print('Mood saved: $moodName with intensity ${(intensity * 100).toInt()}%');
       return true;
     } catch (e) {
-      print('❌ Error saving mood: $e');
+      print('Error saving mood: $e');
       return false;
     }
   }
@@ -72,7 +72,7 @@ class MoodService {
       }
       return null;
     } catch (e) {
-      print('❌ Error getting mood for date: $e');
+      print('Error getting mood for date: $e');
       return null;
     }
   }
@@ -104,15 +104,15 @@ class MoodService {
         });
       }
 
-      print('✅ Loaded ${history.length} mood entries');
+      print('Loaded ${history.length} mood entries');
       return history;
     } catch (e) {
-      print('❌ Error loading mood history: $e');
+      print('Error loading mood history: $e');
       return [];
     }
   }
 
-  // GET MOOD STATISTICS (for a specific month)
+  //GET MOOD STATISTICS (for a specific month)
   Future<Map<String, dynamic>> getMoodStats(DateTime month) async {
     try {
       if (userId == null) {
@@ -138,7 +138,7 @@ class MoodService {
         };
       }
 
-      // Calculate stats
+      //Calculate stats
       int totalEntries = snapshot.docs.length;
       double totalIntensity = 0;
       Map<String, int> moodCounts = {};
@@ -154,7 +154,7 @@ class MoodService {
 
       double averageIntensity = totalIntensity / totalEntries;
 
-      // Find most common mood
+      //Find most common mood
       String mostCommonMood = 'Neutral';
       int maxCount = 0;
       moodCounts.forEach((mood, count) {
@@ -171,12 +171,12 @@ class MoodService {
         'moodBreakdown': moodCounts,
       };
     } catch (e) {
-      print('❌ Error calculating mood stats: $e');
+      print('Error calculating mood stats: $e');
       return {'error': e.toString()};
     }
   }
 
-  // DELETE MOOD ENTRY
+  //DELETE MOOD ENTRY
   Future<bool> deleteMood(DateTime date) async {
     try {
       if (userId == null) return false;
@@ -191,10 +191,10 @@ class MoodService {
           .doc(moodId)
           .delete();
 
-      print('✅ Mood deleted for date: $date');
+      print('Mood deleted for date: $date');
       return true;
     } catch (e) {
-      print('❌ Error deleting mood: $e');
+      print('Error deleting mood: $e');
       return false;
     }
   }
@@ -224,7 +224,7 @@ class MoodService {
 
       return weeklyData;
     } catch (e) {
-      print('❌ Error getting weekly mood data: $e');
+      print('Error getting weekly mood data: $e');
       return [];
     }
   }
@@ -256,10 +256,10 @@ class MoodService {
           .doc(moodId)
           .update(updates);
 
-      print('✅ Mood updated successfully');
+      print('Mood updated successfully');
       return true;
     } catch (e) {
-      print('❌ Error updating mood: $e');
+      print('Error updating mood: $e');
       return false;
     }
   }
