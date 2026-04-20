@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:she_bloom/firebase_options.dart';
 import 'package:she_bloom/screens/home_screen.dart';
 import 'package:she_bloom/screens/splash_screen.dart';
+import 'package:she_bloom/services/notification_service.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'constants/colors.dart';
 
 void main() async{
@@ -12,6 +14,8 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  tz.initializeTimeZones();
+  await NotificationService().init();
   runApp(const SheBloom());
 }
 
