@@ -99,7 +99,6 @@ class NotificationService {
   }
 
   //schedule helper
-
   tz.TZDateTime _nextInstanceOf(TimeOfDay time) {
     final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime(
@@ -117,7 +116,6 @@ class NotificationService {
   }
 
   //period reminder
-
   Future<void> schedulePeriodReminder({
     required TimeOfDay time,
     String title = '🌸 Period Tracker',
