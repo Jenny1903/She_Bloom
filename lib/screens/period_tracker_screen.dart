@@ -13,7 +13,6 @@ class PeriodTrackerScreen extends StatefulWidget {
 class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
   DateTime _selectedMonth = DateTime.now();
   DateTime _today = DateTime.now();
-
   //firebase service
   final PeriodService _periodService = PeriodService();
 
@@ -26,6 +25,7 @@ class _PeriodTrackerScreenState extends State<PeriodTrackerScreen> {
   bool isLoading = true;
 
   @override
+
   void initState() {
     super.initState();
     _loadData();
