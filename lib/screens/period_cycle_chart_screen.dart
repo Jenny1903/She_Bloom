@@ -315,6 +315,12 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     ];
     return '${m[month - 1]} $year';
   }
+
+  _buildOverviewTab() {}
+
+  _buildCycleChartTab() {}
+
+  _buildHeatMapTab() {}
 }
 
 //Data models
