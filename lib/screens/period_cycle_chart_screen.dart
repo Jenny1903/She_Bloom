@@ -823,8 +823,8 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
   }
 
 
-  //shared UI helpers
 
+  //shared UI helpers
   Widget _glassCard({required Widget child, EdgeInsets? padding}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -872,7 +872,6 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
   );
 
   //data helpers
-
   String _formatDate(DateTime d) {
     const m = [
       'Jan','Feb','Mar','Apr','May','Jun',
@@ -893,6 +892,11 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     ];
     return '${m[month - 1]} $year';
   }
+
+  _buildHeatLegend() {}
+
+  Widget? _buildMonthHeatMap(
+      {required int year, required int month, required List<_HeatCell> cells}) {}
 }
 
 //data models
