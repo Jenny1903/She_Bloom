@@ -822,7 +822,130 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     );
   }
 
+  Widget _buildHeatLegend() {
+    return _glassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _heatDot(Colors.grey.shade200),
+          const SizedBox(width: 6),
+          Text('No period', style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
+          const SizedBox(width: 20),
+          _heatDot(AppColors.darkPink),
+          const SizedBox(width: 6),
+          Text('Period day', style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
+          const SizedBox(width: 20),
+          _heatDot(Colors.orange.shade300, border: Colors.orange.shade600),
+          const SizedBox(width: 6),
+          Text('Today', style: TextStyle(fontSize: 12, color: AppColors.textMedium)),
+        ],
+      ),
+    );
+  }
+  Widget _buildMonthHeatMap({
+    required int year,
+    required int month,
+    required List<_HeatCell> cells,
+  }) {
+    final today = DateTime.now();
+    const weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
+    // Build grid: pad start
+    final firstDay = DateTime(year, month, 1);
+    final startPad = firstDay.weekday % 7; // Sunday = 0
+    final List<_HeatCell?> grid = [
+      ...List.filled(startPad, null),
+      ...cells,
+    ];
+
+    return _glassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _monthYearLabel(year, month),
+            style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark),
+          ),
+          const SizedBox(height: 12),
+          // Weekday headers
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: weekdays
+                .map((d) => SizedBox(
+              width: 34,
+              child: Text(d,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textMedium,
+                      fontWeight: FontWeight.w600)),
+            ))
+                .toList(),
+          ),
+          const SizedBox(height: 8),
+          // Day cells
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              crossAxisSpacing: 4,
+              mainAxisSpacing: 4,
+              childAspectRatio: 1,
+            ),
+            itemCount: grid.length,
+            itemBuilder: (_, i) {
+              final cell = grid[i];
+              if (cell == null) return const SizedBox();
+
+              final isToday = cell.date.year == today.year &&
+                  cell.date.month == today.month &&
+                  cell.date.day == today.day;
+
+              Color bgColor;
+              Color textColor;
+              Border? border;
+
+              if (cell.hasPeriod) {
+                bgColor = AppColors.darkPink;
+                textColor = Colors.white;
+              } else if (isToday) {
+                bgColor = Colors.orange.shade100;
+                textColor = Colors.orange.shade800;
+                border = Border.all(color: Colors.orange.shade400, width: 1.5);
+              } else {
+                bgColor = Colors.grey.shade100;
+                textColor = AppColors.textDark;
+              }
+
+              return Container(
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(6),
+                  border: border,
+                ),
+                child: Center(
+                  child: Text(
+                    '${cell.date.day}',
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isToday || cell.hasPeriod
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: textColor),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   //shared UI helpers
   Widget _glassCard({required Widget child, EdgeInsets? padding}) {
