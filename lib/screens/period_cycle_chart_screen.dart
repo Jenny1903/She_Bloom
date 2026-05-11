@@ -19,17 +19,17 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
 
   bool _isLoading = true;
 
-  //Raw data
+  // Raw data
   Set<DateTime> _allPeriodDates = {};
   int _cycleLength = 28;
   int _periodLength = 5;
 
-  //Derived / computed
+  // Derived / computed
   List<_PeriodBlock> _periodBlocks = [];   // Each detected period
   List<_CycleEntry> _cycleEntries = [];    // Cycle lengths between periods
   List<_HeatCell> _heatCells = [];         // Last 6 months heat map cells
 
-  //Stats
+  // Stats
   double _avgCycleLength = 0;
   double _avgPeriodLength = 0;
   int _shortestCycle = 0;
@@ -100,7 +100,7 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     if (_periodBlocks.isNotEmpty) {
       _cycleEntries.add(_CycleEntry(
         index: _periodBlocks.length,
-        cycleLength: _cycleLength,
+        cycleLength: _cycleLength, // use average as placeholder
         periodLength: _periodBlocks.last.length,
         startDate: _periodBlocks.last.start,
       ));
@@ -292,7 +292,7 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     );
   }
 
-//Tab 1: Overview
+  //TAB 1 — OVERVIEW
 
   Widget _buildOverviewTab() {
     return SingleChildScrollView(
@@ -497,8 +497,7 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     );
   }
 
-
-  //Tab 2: cycle chart tab
+  //TAB 2 — CYCLE LENGTH BAR CHART
 
   Widget _buildCycleChartTab() {
     return SingleChildScrollView(
@@ -515,7 +514,7 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
   }
 
   Widget _buildCycleLengthChart() {
-    //Use only real cycle entries (exclude last placeholder)
+    // Use only real cycle entries (exclude last placeholder)
     final entries = _cycleEntries.length > 1
         ? _cycleEntries.take(_cycleEntries.length - 1).toList()
         : _cycleEntries;
@@ -791,7 +790,8 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     );
   }
 
-  //Tab 3: Heat Map
+  //Tab:3 heat map
+
   Widget _buildHeatMapTab() {
     // Group heat cells by month
     final Map<String, List<_HeatCell>> byMonth = {};
@@ -843,6 +843,7 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
       ),
     );
   }
+
   Widget _buildMonthHeatMap({
     required int year,
     required int month,
@@ -851,7 +852,7 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     final today = DateTime.now();
     const weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
-    // Build grid: pad start
+    //Build grid: pad start
     final firstDay = DateTime(year, month, 1);
     final startPad = firstDay.weekday % 7; // Sunday = 0
     final List<_HeatCell?> grid = [
@@ -947,7 +948,8 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     );
   }
 
-  //shared UI helpers
+  //Shared UI helpers
+
   Widget _glassCard({required Widget child, EdgeInsets? padding}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -994,7 +996,8 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     ),
   );
 
-  //data helpers
+  //Date helpers
+
   String _formatDate(DateTime d) {
     const m = [
       'Jan','Feb','Mar','Apr','May','Jun',
@@ -1015,14 +1018,9 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     ];
     return '${m[month - 1]} $year';
   }
-
-  _buildHeatLegend() {}
-
-  Widget? _buildMonthHeatMap(
-      {required int year, required int month, required List<_HeatCell> cells}) {}
 }
 
-//data models
+//Data models
 
 class _PeriodBlock {
   final List<DateTime> days;
