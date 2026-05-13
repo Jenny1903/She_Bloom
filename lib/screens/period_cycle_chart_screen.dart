@@ -106,7 +106,7 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
       ));
     }
 
-    //Stats
+    //stats
     if (_cycleEntries.length > 1) {
       final realCycles = _cycleEntries.take(_cycleEntries.length - 1).toList();
       _avgCycleLength =
@@ -126,13 +126,13 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
         _periodBlocks.map((b) => b.length).reduce((a, b) => a + b) /
             _periodBlocks.length;
 
-    //Predict next
+    // Predict next
     if (_periodBlocks.isNotEmpty) {
       _nextPredicted = _periodBlocks.last.start
           .add(Duration(days: _avgCycleLength.round()));
     }
 
-    //Heat map: last 6 months
+    //Heat map= last 6 months
     _buildHeatMap();
   }
 
@@ -152,8 +152,7 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     }
   }
 
-  //Build
-
+  //build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -293,7 +292,6 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
   }
 
   //TAB 1 — OVERVIEW
-
   Widget _buildOverviewTab() {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -514,7 +512,7 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
   }
 
   Widget _buildCycleLengthChart() {
-    // Use only real cycle entries (exclude last placeholder)
+    //Use only real cycle entries (exclude last placeholder)
     final entries = _cycleEntries.length > 1
         ? _cycleEntries.take(_cycleEntries.length - 1).toList()
         : _cycleEntries;
@@ -790,14 +788,14 @@ class _PeriodCycleChartScreenState extends State<PeriodCycleChartScreen>
     );
   }
 
-  //Tab:3 heat map
+  //TAB 3 — HEAT MAP
 
   Widget _buildHeatMapTab() {
     // Group heat cells by month
     final Map<String, List<_HeatCell>> byMonth = {};
     for (final cell in _heatCells) {
       final key = '${cell.date.year}-${cell.date.month}';
-      byMonth.putIfAbsent(key, () []).add(cell);
+      byMonth.putIfAbsent(key, () => []).add(cell);
     }
 
     return SingleChildScrollView(
