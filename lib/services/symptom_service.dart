@@ -75,7 +75,56 @@ class SymptomService {
     }
   }
 
+//GET HISTORY (last N days)
+  Future<List<Map<String, dynamic>>> getSymptomHistory({int days = 30}) async {
+    try {
+      if (userId == null) return [];
 
+      final startDate = DateTime.now().subtract(Duration(days: days));
+
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('symptoms')
+          .where('date',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .orderBy('date', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'symptoms': List<String>.from(data['symptoms'] ?? []),
+          'notes': data['notes'] ?? '',
+          'date': (data['date'] as Timestamp).toDate(),
+        };
+      }).toList();
+    } catch (e) {
+      print('❌ Error loading symptom history: $e');
+      return [];
+    }
+  }
+
+  //GET FREQUENCY(how often each symptom appears)
+  //Returns e.g. {"Cramps": 8, "Fatigue": 5, ...} sorted by count desc
+  Future<Map<String, int>> getSymptomFrequency({int days = 30}) async {
+    final history = await getSymptomHistory(days: days);
+    final freq = <String, int>{};
+
+    for (final entry in history) {
+      final symptoms = entry['symptoms'] as List<String>;
+      for (final s in symptoms) {
+        freq[s] = (freq[s] ?? 0) + 1;
+      }
+    }
+
+    // Sort by frequency descending
+    final sorted = Map.fromEntries(
+      freq.entries.toList()..sort((a, b) => b.value.compareTo(a.value)),
+    );
+    return sorted;
+  }
   //delete
   Future<bool> deleteSymptoms(DateTime date) async {
     try {
